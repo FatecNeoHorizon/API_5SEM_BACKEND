@@ -1,10 +1,7 @@
 package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.DimPeriodoDTO;
-import com.neohorizon.api.dto.TestEntityDTO;
 import com.neohorizon.api.entity.DimPeriodo;
-import com.neohorizon.api.entity.TestEntity;
-import com.neohorizon.api.repository.DimPeriodoRepository;
 import com.neohorizon.api.repository.DimPeriodoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;

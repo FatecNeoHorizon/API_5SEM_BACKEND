@@ -16,19 +16,15 @@ public class DimPeriodo {
     @Column(name = "periodo_id")
     private Long id;
 
-    @NonNull
     @Column(name = "periodo_dia")
     private Integer dia;
 
-    @NonNull
     @Column(name = "periodo_semana")
     private Integer semana;
 
-    @NonNull
     @Column(name = "periodo_mes")
     private Integer mes;
 
-    @NonNull
     @Column(name = "periodo_ano")
     private Integer ano;
 }
