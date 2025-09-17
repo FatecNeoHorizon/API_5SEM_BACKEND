@@ -40,8 +40,25 @@
 	mvn spring-boot:run
 	```
 
-## Observações
 
-- As configurações de conexão estão protegidas no arquivo `application.properties` e usam variáveis do `.env`.
-- Não é necessário configuração adicional.
-- A API estará disponível na porta padrão configurada.
+## Documentação da API com Swagger
+
+Esta API utiliza o Swagger para documentação e testes interativos dos endpoints.
+
+### Como acessar o Swagger
+
+Após iniciar a aplicação, acesse:
+
+- Interface Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- Documentação dos endpoints: [http://localhost:8080/api-docs](http://localhost:8080/api-docs)
+
+
+
+O Swagger é uma ferramenta essencial para APIs REST, pois:
+
+- Permite explorar todos os endpoints de forma visual e interativa.
+- Facilita o teste das operações diretamente pelo navegador, sem necessidade de ferramentas externas.
+- Exibe exemplos de requisição e resposta, parâmetros e modelos de dados.
+- Ajuda desenvolvedores e equipes a entenderem rapidamente como utilizar a API.
+
+Com o Swagger, qualquer pessoa pode experimentar os recursos do CRUD, validar integrações e aprender sobre a API sem precisar consultar a documentação técnica tradicional.
