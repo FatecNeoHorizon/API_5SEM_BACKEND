@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<sonar.organization>fatecneohorizon</sonar.organization>
+		<sonar.projectKey>FatecNeoHorizon_API_5SEM_BACKEND</sonar.projectKey>
 	</properties>
 	<dependencies>
 		<dependency>
