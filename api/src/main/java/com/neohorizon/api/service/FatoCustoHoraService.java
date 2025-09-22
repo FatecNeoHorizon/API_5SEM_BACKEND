@@ -1,6 +1,9 @@
 package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.FatoCustoHoraDTO;
+import com.neohorizon.api.entity.DimDev;
+import com.neohorizon.api.entity.DimPeriodo;
+import com.neohorizon.api.entity.DimProjeto;
 import com.neohorizon.api.entity.FatoCustoHora;
 import com.neohorizon.api.repository.FatoCustoHoraRepository;
 
@@ -18,6 +21,14 @@ public class FatoCustoHoraService {
     @Autowired
     public FatoCustoHoraService(FatoCustoHoraRepository fatoCustoHoraRepository) {
         this.fatoCustoHoraRepository = fatoCustoHoraRepository;
+    }
+
+    public List<FatoCustoHoraDTO> getAllEntitiesByFilter(DimProjeto dimProjeto, DimPeriodo dimPeriodo, DimDev dimDev)
+    {
+        return fatoCustoHoraRepository.findByDimProjetoAndDimPeriodoAndDimDev(dimProjeto, dimPeriodo, dimDev)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<FatoCustoHoraDTO> getAllEntities() {

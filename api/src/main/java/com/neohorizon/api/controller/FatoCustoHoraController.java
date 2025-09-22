@@ -1,6 +1,9 @@
 package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoCustoHoraDTO;
+import com.neohorizon.api.entity.DimDev;
+import com.neohorizon.api.entity.DimPeriodo;
+import com.neohorizon.api.entity.DimProjeto;
 import com.neohorizon.api.service.FatoCustoHoraService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/fato-custo-hora")
@@ -20,6 +26,42 @@ public class FatoCustoHoraController {
     public FatoCustoHoraController(FatoCustoHoraService fatoCustoHoraService) {
         this.fatoCustoHoraService = fatoCustoHoraService;
     }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntitiesByFilter(
+        @RequestParam Long projeto_id,
+        @RequestParam Long periodo_id,
+        @RequestParam Long dev_id) {
+
+        DimProjeto dimProjeto = new DimProjeto();
+        DimPeriodo dimPeriodo = new DimPeriodo();
+        DimDev dimDev = new DimDev();
+
+       
+        dimProjeto.setId(projeto_id);
+        dimPeriodo.setId(periodo_id);
+        dimDev.setId(dev_id);
+       
+       
+        if(periodo_id == 0)
+        {
+            dimPeriodo = null;
+        }
+
+        if(projeto_id == 0)
+        {
+            dimProjeto = null;
+        }
+
+        if(dev_id == 0)
+        {
+            dimDev = null;
+        }
+
+        List<FatoCustoHoraDTO> fatoCustoHoraDTOs = fatoCustoHoraService.getAllEntitiesByFilter(dimProjeto,dimPeriodo, dimDev);
+        return ResponseEntity.ok(fatoCustoHoraDTOs);
+    }
+    
 
     @GetMapping
     public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntities(
