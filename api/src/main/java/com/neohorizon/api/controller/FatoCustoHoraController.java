@@ -29,31 +29,31 @@ public class FatoCustoHoraController {
 
     @GetMapping("/filter")
     public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntitiesByFilter(
-        @RequestParam Long projeto_id,
-        @RequestParam Long periodo_id,
-        @RequestParam Long dev_id) {
+        @RequestParam Long projetoId,
+        @RequestParam Long periodoId,
+        @RequestParam Long devId) {
 
         DimProjeto dimProjeto = new DimProjeto();
         DimPeriodo dimPeriodo = new DimPeriodo();
         DimDev dimDev = new DimDev();
 
        
-        dimProjeto.setId(projeto_id);
-        dimPeriodo.setId(periodo_id);
-        dimDev.setId(dev_id);
+        dimProjeto.setId(projetoId);
+        dimPeriodo.setId(periodoId);
+        dimDev.setId(devId);
        
        
-        if(periodo_id == 0)
+        if(periodoId == 0)
         {
             dimPeriodo = null;
         }
 
-        if(projeto_id == 0)
+        if(projetoId == 0)
         {
             dimProjeto = null;
         }
 
-        if(dev_id == 0)
+        if(devId == 0)
         {
             dimDev = null;
         }

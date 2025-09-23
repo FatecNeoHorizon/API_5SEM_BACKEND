@@ -16,15 +16,15 @@ public class FatoCustoHora {
     @Column(name = "custo_hora_id")
     private Long id;
 
-    @ManyToOne(cascade=CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "projeto_id", nullable = false)
     private DimProjeto dimProjeto;
 
-    @ManyToOne(cascade=CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "periodo_id", nullable = false)
     private DimPeriodo dimPeriodo;
 
-    @ManyToOne(cascade=CascadeType.PERSIST)
+    @ManyToOne
     @JoinColumn(name = "dev_id", nullable = false)
     private DimDev dimDev;
 
