@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -29,9 +27,9 @@ public class FatoCustoHoraController {
 
     @GetMapping("/filter")
     public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntitiesByFilter(
-        @RequestParam Long projetoId,
-        @RequestParam Long periodoId,
-        @RequestParam Long devId) {
+        @RequestParam("projeto_id") Long projetoId,
+        @RequestParam("periodo_id") Long periodoId,
+        @RequestParam("dev_id") Long devId) {
 
         DimProjeto dimProjeto = new DimProjeto();
         DimPeriodo dimPeriodo = new DimPeriodo();
