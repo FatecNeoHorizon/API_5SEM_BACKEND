@@ -11,7 +11,7 @@ import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 import com.neohorizon.api.entity.FatoIssue;
 
 @Repository
-public interface TotalIssueRepository extends JpaRepository<FatoIssue, Long> {
+public interface IssueRepository extends JpaRepository<FatoIssue, Long> {
 
     @Query("SELECT COUNT(fi.id) FROM FatoIssue fi")
     Long countAllIssues();
