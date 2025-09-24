@@ -6,24 +6,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
-import com.neohorizon.api.repository.TotalIssueRepository;
+import com.neohorizon.api.repository.IssueRepository;
 
 @Service
-public class TotalIssueService {
+public class IssueService {
 
     @Autowired
-    private TotalIssueRepository totalIssueRepository;
+    private IssueRepository issueRepository;
 
     public Long getTotalIssues() {
-        return totalIssueRepository.countAllIssues();
+        return issueRepository.countAllIssues();
     }
 
     public List<ProjectIssueCountDTO> getIssuesByProject(Long projectId) {
-        return totalIssueRepository.findIssueByProject(projectId);
+        return issueRepository.findIssueByProject(projectId);
     }
 
     public List<ProjectIssueCountDTO> getAllProjectIssues() {
-        return totalIssueRepository.findAllProjectIssues();
+        return issueRepository.findAllProjectIssues();
     }
 
 }
