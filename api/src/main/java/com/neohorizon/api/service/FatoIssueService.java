@@ -1,6 +1,7 @@
 package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
+import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 import com.neohorizon.api.entity.FatoIssue;
 import com.neohorizon.api.repository.FatoIssueRepository;
 
@@ -86,4 +87,17 @@ public class FatoIssueService {
         entity.setQuantidade(dto.getQuantidade());
         return entity;
     }
+
+    public Long getTotalIssues() {
+        return fatoIssueRepository.countAllIssues();
+    }
+
+    public List<ProjectIssueCountDTO> getIssuesByProject(Long projectId) {
+        return fatoIssueRepository.findIssueByProject(projectId);
+    }
+
+    public List<ProjectIssueCountDTO> getAllProjectIssues() {
+        return fatoIssueRepository.findAllProjectIssues();
+    }
+
 }
