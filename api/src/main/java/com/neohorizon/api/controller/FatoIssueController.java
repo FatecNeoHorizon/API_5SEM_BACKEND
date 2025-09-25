@@ -61,17 +61,17 @@ public class FatoIssueController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("total")
+    @GetMapping("/total")
     public ResponseEntity<Long> getTotalIssues() {
         return ResponseEntity.ok(fatoIssueService.getTotalIssues());
     }
 
-    @GetMapping("todos-projetos")
+    @GetMapping("/todos-projetos")
     public ResponseEntity<List<ProjectIssueCountDTO>> getAllProjectIssues() {
         return ResponseEntity.ok(fatoIssueService.getAllProjectIssues());
     }
 
-    @GetMapping("por-projeto/{projectId}")
+    @GetMapping("/por-projeto/{projectId}")
     public ResponseEntity<List<ProjectIssueCountDTO>> getIssuesByProject(@PathVariable Long projectId) {
         return ResponseEntity.ok(fatoIssueService.getIssuesByProject(projectId));
     }
