@@ -2,12 +2,17 @@ package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
+import com.neohorizon.api.dto.IssueDTO.TotalCountDTO;
 import com.neohorizon.api.entity.FatoIssue;
 import com.neohorizon.api.repository.FatoIssueRepository;
+
+import jakarta.persistence.Query;
+import jakarta.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,10 +20,12 @@ import java.util.stream.Collectors;
 public class FatoIssueService {
 
     private final FatoIssueRepository fatoIssueRepository;
+    private final EntityManager entityManager;
 
     @Autowired
-    public FatoIssueService(FatoIssueRepository fatoIssueRepository) {
+    public FatoIssueService(FatoIssueRepository fatoIssueRepository, EntityManager entityManager) {
         this.fatoIssueRepository = fatoIssueRepository;
+        this.entityManager = entityManager;
     }
 
     public List<FatoIssueDTO> getAllEntities() {
@@ -100,4 +107,50 @@ public class FatoIssueService {
         return fatoIssueRepository.findAllProjectIssues();
     }
 
+public List<Object[]> getIssuesByAggregation(LocalDate dataInicio, LocalDate dataFim, String agregacao) {
+        String selectGroupBy;
+
+        switch (agregacao.toLowerCase()) {
+            case "ano":
+                selectGroupBy = "periodo_ano::text";
+                break;
+            case "mes":
+                selectGroupBy = "CONCAT(periodo_ano, '-', LPAD(periodo_mes::text, 2, '0'))";
+                break;
+            case "semana":
+                selectGroupBy = "CONCAT(periodo_ano, '-W', LPAD(periodo_semana::text, 2, '0'))";
+                break;
+            case "dia":
+            default:
+                selectGroupBy = "TO_CHAR(TO_DATE(CONCAT(periodo_ano, '-', periodo_mes, '-', periodo_dia), 'YYYY-MM-DD'), 'YYYY-MM-DD')";
+                break;
+        }
+
+        String sql = """
+            WITH periodo_filtrado AS (
+                SELECT periodo_id,
+                       periodo_ano,
+                       periodo_mes,
+                       periodo_semana,
+                       periodo_dia,
+                       TO_DATE(CONCAT(periodo_ano, '-', periodo_mes, '-', periodo_dia), 'YYYY-MM-DD') AS data
+                FROM dim_periodo
+                WHERE TO_DATE(CONCAT(periodo_ano, '-', periodo_mes, '-', periodo_dia), 'YYYY-MM-DD')
+                      BETWEEN :dataInicio AND :dataFim
+            )
+            SELECT 
+                %s AS periodo,
+                SUM(fi.issue_quantidade) AS total_issues
+            FROM fato_issue fi
+            JOIN periodo_filtrado pf ON fi.periodo_id = pf.periodo_id
+            GROUP BY periodo
+            ORDER BY periodo
+        """.formatted(selectGroupBy);
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("dataInicio", dataInicio);
+        query.setParameter("dataFim", dataFim);
+
+        return query.getResultList();
+    }
 }
