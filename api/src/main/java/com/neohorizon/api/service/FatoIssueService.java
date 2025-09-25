@@ -2,7 +2,6 @@ package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
-import com.neohorizon.api.dto.IssueDTO.TotalCountDTO;
 import com.neohorizon.api.entity.FatoIssue;
 import com.neohorizon.api.repository.FatoIssueRepository;
 
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FatoIssueService {
@@ -32,7 +30,7 @@ public class FatoIssueService {
         return fatoIssueRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public FatoIssueDTO findById(Long id) {

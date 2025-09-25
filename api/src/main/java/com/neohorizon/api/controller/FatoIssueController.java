@@ -2,7 +2,6 @@ package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
-import com.neohorizon.api.dto.IssueDTO.TotalCountDTO;
 import com.neohorizon.api.service.FatoIssueService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/fato-issue")
@@ -91,6 +89,6 @@ public class FatoIssueController {
                         "periodo", r[0],
                         "totalIssues", ((Number) r[1]).longValue()
                 ))
-                .collect(Collectors.toList());
+                .toList();
     }
 }
