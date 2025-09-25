@@ -1,6 +1,7 @@
 package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
+import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 import com.neohorizon.api.service.FatoIssueService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,21 @@ public class FatoIssueController {
     public ResponseEntity<Void> deleteFatoIssue(@PathVariable Long id) {
         fatoIssueService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("total")
+    public ResponseEntity<Long> getTotalIssues() {
+        return ResponseEntity.ok(fatoIssueService.getTotalIssues());
+    }
+
+    @GetMapping("todos-projetos")
+    public ResponseEntity<List<ProjectIssueCountDTO>> getAllProjectIssues() {
+        return ResponseEntity.ok(fatoIssueService.getAllProjectIssues());
+    }
+
+    @GetMapping("por-projeto/{projectId}")
+    public ResponseEntity<List<ProjectIssueCountDTO>> getIssuesByProject(@PathVariable Long projectId) {
+        return ResponseEntity.ok(fatoIssueService.getIssuesByProject(projectId));
     }
 
 }
