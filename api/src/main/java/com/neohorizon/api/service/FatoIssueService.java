@@ -3,7 +3,9 @@ package com.neohorizon.api.service;
 import com.neohorizon.api.dto.FatoIssueDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 import com.neohorizon.api.entity.FatoIssue;
+import com.neohorizon.api.enums.AggregationType;
 import com.neohorizon.api.repository.FatoIssueRepository;
+
 
 import jakarta.persistence.Query;
 import jakarta.persistence.EntityManager;
@@ -105,20 +107,27 @@ public class FatoIssueService {
         return fatoIssueRepository.findAllProjectIssues();
     }
 
-public List<Object[]> getIssuesByAggregation(LocalDate dataInicio, LocalDate dataFim, String agregacao) {
+public List<Object []> getIssuesByAggregation(LocalDate dataInicio, LocalDate dataFim, String agregacao) {
         String selectGroupBy;
+        
+        AggregationType tipoAgregacao;
+        try {
+            tipoAgregacao = AggregationType.valueOf(agregacao.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            tipoAgregacao = AggregationType.DIA;
+        }
 
-        switch (agregacao.toLowerCase()) {
-            case "ano":
+        switch (tipoAgregacao) {
+            case ANO:
                 selectGroupBy = "periodo_ano::text";
                 break;
-            case "mes":
+            case MES:
                 selectGroupBy = "CONCAT(periodo_ano, '-', LPAD(periodo_mes::text, 2, '0'))";
                 break;
-            case "semana":
+            case SEMANA:
                 selectGroupBy = "CONCAT(periodo_ano, '-W', LPAD(periodo_semana::text, 2, '0'))";
                 break;
-            case "dia":
+            case DIA:
             default:
                 selectGroupBy = "TO_CHAR(TO_DATE(CONCAT(periodo_ano, '-', periodo_mes, '-', periodo_dia), 'YYYY-MM-DD'), 'YYYY-MM-DD')";
                 break;
