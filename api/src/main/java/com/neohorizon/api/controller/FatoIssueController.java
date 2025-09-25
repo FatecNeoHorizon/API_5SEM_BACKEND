@@ -2,14 +2,19 @@ package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
+import com.neohorizon.api.dto.IssueDTO.TotalCountDTO;
 import com.neohorizon.api.service.FatoIssueService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/fato-issue")
@@ -72,5 +77,20 @@ public class FatoIssueController {
     public ResponseEntity<List<ProjectIssueCountDTO>> getIssuesByProject(@PathVariable Long projectId) {
         return ResponseEntity.ok(fatoIssueService.getIssuesByProject(projectId));
     }
+    
+    @GetMapping("/agregado")
+    public List<Map<String, Object>> getIssuesByAggregation(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            @RequestParam(defaultValue = "dia") String agregacao) {
 
+        List<Object[]> results = fatoIssueService.getIssuesByAggregation(dataInicio, dataFim, agregacao);
+
+        return results.stream()
+                .map(r -> Map.of(
+                        "periodo", r[0],
+                        "totalIssues", ((Number) r[1]).longValue()
+                ))
+                .collect(Collectors.toList());
+    }
 }
