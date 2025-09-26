@@ -1,6 +1,7 @@
 package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
+import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 import com.neohorizon.api.service.FatoIssueService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,4 +58,29 @@ public class FatoIssueController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/total")
+    public ResponseEntity<Long> getTotalIssues() {
+        return ResponseEntity.ok(fatoIssueService.getTotalIssues());
+    }
+
+    @GetMapping("/todos-projetos")
+    public ResponseEntity<List<ProjectIssueCountDTO>> getAllProjectIssues() {
+        return ResponseEntity.ok(fatoIssueService.getAllProjectIssues());
+    }
+
+    @GetMapping("/por-projeto/{projectId}")
+    public ResponseEntity<List<ProjectIssueCountDTO>> getIssuesByProject(@PathVariable Long projectId) {
+        return ResponseEntity.ok(fatoIssueService.getIssuesByProject(projectId));
+    }
+    
+    @GetMapping("/agregado")
+    public ResponseEntity<List<ProjectIssueCountDTO>> getIssuesByAggregation(
+            @RequestParam String dataInicio,
+            @RequestParam String dataFim,
+            @RequestParam String periodo) {
+
+        List<ProjectIssueCountDTO> issuesResultDTOs = fatoIssueService.getIssuesByAggregation(dataInicio, dataFim, periodo);
+
+        return ResponseEntity.ok(issuesResultDTOs);
+    }
 }

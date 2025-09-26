@@ -1,14 +1,17 @@
 package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
+import com.neohorizon.api.dto.IssueDTO.IssueAgregationDTO;
+import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 import com.neohorizon.api.entity.FatoIssue;
+import com.neohorizon.api.enums.AggregationType;
 import com.neohorizon.api.repository.FatoIssueRepository;
+import com.neohorizon.api.utils.ConvertStringToInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FatoIssueService {
@@ -24,7 +27,7 @@ public class FatoIssueService {
         return fatoIssueRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public FatoIssueDTO findById(Long id) {
@@ -86,4 +89,37 @@ public class FatoIssueService {
         entity.setQuantidade(dto.getQuantidade());
         return entity;
     }
+
+    public Long getTotalIssues() {
+        return fatoIssueRepository.countAllIssues();
+    }
+
+    public List<ProjectIssueCountDTO> getIssuesByProject(Long projectId) {
+        return fatoIssueRepository.findIssueByProject(projectId);
+    }
+
+    public List<ProjectIssueCountDTO> getAllProjectIssues() {
+        return fatoIssueRepository.findAllProjectIssues();
+    }
+
+    public List<ProjectIssueCountDTO> getIssuesByAggregation(String dataInicio, String dataFim, String periodo) {
+
+        Integer[] dataInicioInteger = ConvertStringToInteger.convertStringDateToInteger(dataInicio);
+        Integer[] dataFimInteger = ConvertStringToInteger.convertStringDateToInteger(dataFim);
+        AggregationType periodoEnum = AggregationType.fromString(periodo);
+
+        IssueAgregationDTO periodoBuscado = new IssueAgregationDTO();
+        periodoBuscado.setAnoInicio(dataInicioInteger[0]); // parts[0] é o ano
+        periodoBuscado.setMesInicio(dataInicioInteger[1]); // parts[1] é o mês
+        periodoBuscado.setDiaInicio(dataInicioInteger[2]); // parts[2] é o dia
+
+        periodoBuscado.setAnoFim(dataFimInteger[0]);    // parts[0] é o ano
+        periodoBuscado.setMesFim(dataFimInteger[1]);    // parts[1] é o mês
+        periodoBuscado.setDiaFim(dataFimInteger[2]);    // parts[2] é o dia
+    
+        periodoBuscado.setPeriodo(periodoEnum);
+
+        return fatoIssueRepository.findIssuesByPeriod(periodoBuscado);
+    }
+        
 }
