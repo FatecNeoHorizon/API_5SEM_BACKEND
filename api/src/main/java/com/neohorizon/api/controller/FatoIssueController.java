@@ -2,6 +2,8 @@ package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
+import com.neohorizon.api.enums.AggregationType;
+import com.neohorizon.api.dto.IssueDTO.IssuesResultDTO;
 import com.neohorizon.api.service.FatoIssueService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/fato-issue")
@@ -77,18 +78,18 @@ public class FatoIssueController {
     }
     
     @GetMapping("/agregado")
-    public List<Map<String, Object>> getIssuesByAggregation(
+    public ResponseEntity<List<IssuesResultDTO>> getIssuesByAggregation(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
-            @RequestParam(defaultValue = "dia") String agregacao) {
+            @RequestParam(defaultValue = "DIA") AggregationType periodo) {
 
-        List<Object[]> results = fatoIssueService.getIssuesByAggregation(dataInicio, dataFim, agregacao);
-
-        return results.stream()
-                .map(r -> Map.of(
-                        "periodo", r[0],
-                        "totalIssues", ((Number) r[1]).longValue()
-                ))
-                .toList();
+        try {
+            List<IssuesResultDTO> result = fatoIssueService.getIssuesByAggregation(dataInicio, dataFim, periodo);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
+
+
 }
