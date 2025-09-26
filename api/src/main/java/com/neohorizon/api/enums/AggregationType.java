@@ -5,5 +5,14 @@ public enum AggregationType {
     DIA,
     SEMANA,
     MES,
-    ANO
+    ANO;
+
+    public static AggregationType fromString(String value) {
+        if (value == null) return DIA;
+        try {
+            return AggregationType.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return DIA;
+        }
+    }
 }
