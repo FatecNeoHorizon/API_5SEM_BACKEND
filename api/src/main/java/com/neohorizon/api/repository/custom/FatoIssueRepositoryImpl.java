@@ -101,10 +101,11 @@ public class FatoIssueRepositoryImpl implements FatoIssueRepositoryCustom {
         query.setParameter("mesFim", issueAgregationDTO.getMesFim());
         query.setParameter("diaFim", issueAgregationDTO.getDiaFim());
 
-        List<Object[]> results = query.getResultList();
+        List<?> rawResults = query.getResultList();
 
         List<ProjectIssueCountDTO> dtos = new ArrayList<>();
-        for (Object[] row : results) {
+        for (Object result : rawResults) {
+            Object[] row = (Object[]) result;
             String dataAgrupada = (String) row[0];
             long totalIssues = ((Number) row[1]).longValue(); 
 
