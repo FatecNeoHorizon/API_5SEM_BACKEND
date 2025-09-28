@@ -3,13 +3,14 @@ package com.neohorizon.api.repository.custom;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 import com.neohorizon.api.dto.IssueDTO.IssueAgregationDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-import org.springframework.stereotype.Repository;
 
 @Repository
 public class FatoIssueRepositoryImpl implements FatoIssueRepositoryCustom {
@@ -24,36 +25,30 @@ public class FatoIssueRepositoryImpl implements FatoIssueRepositoryCustom {
             String groupColumns;
             String orderColumns;
 
-            switch (issueAgregationDTO.getPeriodo()) {
-            case DIA:
-                // Exemplo: "2025-01-31"
+        switch (issueAgregationDTO.getPeriodo()) {
+            case DIA -> {
                 selectFormat = "TO_CHAR(MAKE_DATE(dp.periodo_ano, dp.periodo_mes, dp.periodo_dia), 'YYYY-MM-DD') AS dataAgrupada";
                 groupColumns = "dp.periodo_ano, dp.periodo_mes, dp.periodo_dia";
                 orderColumns = "dp.periodo_ano, dp.periodo_mes, dp.periodo_dia";
-                break;
-            case SEMANA:
-                // Exemplo: "2025-S05" (Ano-Semana)
-                // LPAD(dp.periodo_semana::text, 2, '0') garante que '5' vire '05'
+            }
+            case SEMANA -> {
                 selectFormat = "CONCAT(dp.periodo_ano, '-S', LPAD(dp.periodo_semana::text, 2, '0')) AS dataAgrupada";
                 groupColumns = "dp.periodo_ano, dp.periodo_semana";
                 orderColumns = "dp.periodo_ano, dp.periodo_semana";
-                break;
-            case MES:
-                // Exemplo: "2025-01"
-                // MAKE_DATE com dia 1 é usado para TO_CHAR funcionar com Ano e Mês.
+            }
+            case MES -> {
                 selectFormat = "TO_CHAR(MAKE_DATE(dp.periodo_ano, dp.periodo_mes, 1), 'YYYY-MM') AS dataAgrupada";
                 groupColumns = "dp.periodo_ano, dp.periodo_mes";
                 orderColumns = "dp.periodo_ano, dp.periodo_mes";
-                break;
-            case ANO:
-                // Exemplo: "2025"
-                selectFormat = "dp.periodo_ano::text AS dataAgrupada"; // Converte o INTEGER Ano para TEXT
+            }
+            case ANO -> {
+                selectFormat = "dp.periodo_ano::text AS dataAgrupada";
                 groupColumns = "dp.periodo_ano";
                 orderColumns = "dp.periodo_ano";
-                break;
-            default:
-                // Caso um AggregationType inesperado seja passado (embora seu fromString trate isso)
+            }
+            default -> {
                 throw new IllegalArgumentException("Tipo de agregação inválido: " + issueAgregationDTO.getPeriodo());
+            }
         }
 
         String whereClause = """
@@ -75,7 +70,6 @@ public class FatoIssueRepositoryImpl implements FatoIssueRepositoryCustom {
             )
         """;
 
-        // 4. Montar a query SQL completa usando String.format para injetar as partes dinâmicas
         String sqlQuery = String.format("""
             SELECT
                 %s,                                 -- dataAgrupada formatada
