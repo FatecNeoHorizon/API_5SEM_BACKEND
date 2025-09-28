@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/dim-atividade")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class DimAtividadeController {
 
     private final DimAtividadeService dimAtividadeService;

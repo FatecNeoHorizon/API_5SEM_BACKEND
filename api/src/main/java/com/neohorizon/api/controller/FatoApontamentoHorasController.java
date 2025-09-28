@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/fato-apontamento-horas")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class FatoApontamentoHorasController {
 
     private final FatoApontamentoHorasService fatoApontamentoHorasService;
@@ -50,7 +49,7 @@ public class FatoApontamentoHorasController {
 
     @PostMapping("/add")
     public ResponseEntity<FatoApontamentoHorasDTO> addFatoApontamentoHoras(@RequestBody FatoApontamentoHorasDTO fatoApontamentoHorasDTO) {
-        FatoApontamentoHorasDTO createdEntity = fatoApontamentoHorasService.save(fatoApontamentoHorasDTO);
+        FatoApontamentoHorasDTO createdEntity = fatoApontamentoHorasService.create(fatoApontamentoHorasDTO);
         return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
     }
 

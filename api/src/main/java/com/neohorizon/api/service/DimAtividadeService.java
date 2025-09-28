@@ -1,5 +1,6 @@
 package com.neohorizon.api.service;
 
+import com.neohorizon.api.constants.MessageConstants;
 import com.neohorizon.api.dto.DimAtividadeDTO;
 import com.neohorizon.api.entity.DimAtividade;
 import com.neohorizon.api.entity.DimProjeto;
@@ -91,6 +92,12 @@ public class DimAtividadeService {
         DimProjeto projeto = null;
         if (dto.getProjetoId() != null) {
             projeto = dimProjetoRepository.findById(dto.getProjetoId()).orElse(null);
+
+            if (projeto == null) {
+                throw new IllegalArgumentException(
+                    MessageConstants.projectNotFound(dto.getProjetoId())
+                );
+            }
         }
 
         return DimAtividade.builder()

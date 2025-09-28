@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/metrics")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class MetricsController {
 
     private final DevHoursMetricsService devHoursMetricsService;
