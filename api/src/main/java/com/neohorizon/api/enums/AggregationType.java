@@ -9,10 +9,27 @@ public enum AggregationType {
 
     public static AggregationType fromString(String value) {
         if (value == null) return DIA;
-        try {
-            return AggregationType.valueOf(value.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return DIA;
+        String v = value.trim().toLowerCase();
+        switch (v) {
+            case "dia" -> {
+                return DIA;
+            }
+            case "semana" -> {
+                return SEMANA;
+            }
+            case "mes", "mês" -> {
+                return MES;
+            }
+            case "ano" -> {
+                return ANO;
+            }
+            default -> {
+                try {
+                    return AggregationType.valueOf(value.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    return DIA;
+                }
+            }
         }
     }
 }
