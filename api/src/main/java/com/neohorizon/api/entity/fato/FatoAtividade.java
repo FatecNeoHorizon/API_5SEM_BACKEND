@@ -1,5 +1,8 @@
 package com.neohorizon.api.entity.fato;
 
+import java.math.BigDecimal;
+
+import com.neohorizon.api.entity.dimensao.DimAtividade;
 import com.neohorizon.api.entity.dimensao.DimPeriodo;
 import com.neohorizon.api.entity.dimensao.DimProjeto;
 import com.neohorizon.api.entity.dimensao.DimStatus;
@@ -10,16 +13,21 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "fato_atividade")
+@Table(name = "fato_atividade",
+    uniqueConstraints = @UniqueConstraint(name = "uq_atividade_gran", columnNames = {"atividade_id","projeto_id","periodo_id","status_id","tipo_id"}),
+    indexes = {@Index(name = "idx_fato_atividade_proj_periodo", columnList = "projeto_id, periodo_id")}
+)
 @Data
 @Builder
 @NoArgsConstructor
@@ -28,8 +36,12 @@ public class FatoAtividade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "atividade_id")
+    @Column(name = "fato_atividade_id")
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "atividade_id", nullable = false)
+    private DimAtividade dimAtividade;
 
     @ManyToOne
     @JoinColumn(name = "projeto_id", nullable = false)
@@ -47,6 +59,6 @@ public class FatoAtividade {
     @JoinColumn(name = "tipo_id", nullable = false)
     private DimTipo dimTipo;
 
-    @Column(name = "atividade_quantidade")
-    private Integer quantidade;
+    @Column(name = "atividade_quantidade", precision = 10, scale = 2)
+    private BigDecimal quantidade;
 }

@@ -1,7 +1,16 @@
 package com.neohorizon.api.entity.dimensao;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Entity
 @Table(name = "dim_projeto")
@@ -25,5 +34,5 @@ public class DimProjeto {
     private String key;
 
     @Column(name = "projeto_jira_id")
-    private String jira_id;
+    private String projeto_jira_id;
 }

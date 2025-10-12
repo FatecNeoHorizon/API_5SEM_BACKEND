@@ -1,5 +1,7 @@
 package com.neohorizon.api.entity.dimensao;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -29,18 +31,7 @@ public class DimDev {
     @Column(name = "dev_nome")
     private String nome;
 
-    @Column(name = "dev_email")
-    private String email;
+    @Column(name = "dev_custo_hora", precision = 10, scale = 2)
+    private BigDecimal custo_hora;
 
-    @Column(name = "dev_senha")
-    private String senha;
-
-    @Column(name = "dev_role")
-    private String role;
-
-    @Column(name = "dev_custo_hora")
-    private Integer custo_hora;
-
-    @Column(name = "dev_ativo")
-    private Boolean ativo;
 }
