@@ -16,41 +16,69 @@ import com.neohorizon.api.entity.fato.FatoCustoHora;
 public interface FatoMapper {
 
     // Fato Apontamento Horas
-    @Mapping(source = "dimDev.id", target = "devId")
-    @Mapping(source = "dimDev.nome", target = "devNome")
-    @Mapping(source = "dimAtividade.id", target = "atividadeId")
-    @Mapping(source = "dimAtividade.nome", target = "atividadeNome")
-    @Mapping(source = "dimProjeto.id", target = "projetoId")
-    @Mapping(source = "dimProjeto.nome", target = "projetoNome")
-    FatoApontamentoHorasDTO apontamentoToDTO(FatoApontamentoHoras fatoApontamentoHoras);
+    @Mapping(source = "dimDev", target = "dimDev")
+    @Mapping(source = "dimAtividade", target = "dimAtividade")
+    @Mapping(source = "dimProjeto", target = "dimProjeto")
+    @Mapping(source = "dimPeriodo", target = "dimPeriodo")
+    @Mapping(source = "horasTrabalhadas", target = "horasTrabalhadas")
+    @Mapping(source = "descricaoTrabalho", target = "descricaoTrabalho")
+    @Mapping(source = "dataCriacao", target = "dataCriacao")
+    @Mapping(source = "dataAtualizacao", target = "dataAtualizacao")
+    FatoApontamentoHorasDTO fatoApontamentoToDTO(FatoApontamentoHoras fatoApontamentoHoras);
     
-    @Mapping(source = "devId", target = "dimDev.id")
-    @Mapping(target = "dimDev.nome", ignore = true)
-    @Mapping(target = "dimDev.email", ignore = true)
-    @Mapping(target = "dimDev.ativo", ignore = true)
-    @Mapping(source = "atividadeId", target = "dimAtividade.id")
-    @Mapping(target = "dimAtividade.nome", ignore = true)
-    @Mapping(target = "dimAtividade.descricao", ignore = true)
-    @Mapping(target = "dimAtividade.dimProjeto", ignore = true)
-    @Mapping(target = "dimAtividade.ativo", ignore = true)
-    @Mapping(source = "projetoId", target = "dimProjeto.id")
-    @Mapping(target = "dimProjeto.nome", ignore = true)
-    @Mapping(target = "dimProjeto.key", ignore = true)
-    @Mapping(target = "dimProjeto.jira_id", ignore = true)
-    FatoApontamentoHoras dtoToApontamento(FatoApontamentoHorasDTO fatoApontamentoHorasDTO);
-    
-    List<FatoApontamentoHorasDTO> apontamentoListToDTO(List<FatoApontamentoHoras> fatoApontamentoHoras);
-    List<FatoApontamentoHoras> dtoListToApontamento(List<FatoApontamentoHorasDTO> fatoApontamentoHorasDTOs);
+    @Mapping(source = "dimDev", target = "dimDev")
+    @Mapping(source = "dimAtividade", target = "dimAtividade")
+    @Mapping(source = "dimProjeto", target = "dimProjeto")
+    @Mapping(source = "dimPeriodo", target = "dimPeriodo")
+    @Mapping(source = "horasTrabalhadas", target = "horasTrabalhadas")
+    @Mapping(source = "descricaoTrabalho", target = "descricaoTrabalho")
+    @Mapping(source = "dataCriacao", target = "dataCriacao")
+    @Mapping(source = "dataAtualizacao", target = "dataAtualizacao")
+    FatoApontamentoHoras dtoToFatoApontamento(FatoApontamentoHorasDTO fatoApontamentoHorasDTO);
+
+    List<FatoApontamentoHorasDTO> fatoApontamentoListToDTO(List<FatoApontamentoHoras> fatoApontamentoHoras);
+    List<FatoApontamentoHoras> dtoListToFatoApontamento(List<FatoApontamentoHorasDTO> fatoApontamentoHorasDTOs);
+
+
+    // Fato Atividade (mapeamento direto pois DTO usa entidades)
+    @Mapping(source = "dimAtividade", target = "dimAtividade")
+    @Mapping(source = "dimProjeto", target = "dimProjeto")
+    @Mapping(source = "dimPeriodo", target = "dimPeriodo")
+    @Mapping(source = "dimStatus", target = "dimStatus")
+    @Mapping(source = "dimTipo", target = "dimTipo")
+    @Mapping(source = "quantidade", target = "quantidade")
+    FatoAtividadeDTO fatoAtividadeToDTO(FatoAtividade fatoAtividade);
+
+    @Mapping(source = "dimAtividade", target = "dimAtividade")
+    @Mapping(source = "dimProjeto", target = "dimProjeto")
+    @Mapping(source = "dimPeriodo", target = "dimPeriodo")
+    @Mapping(source = "dimStatus", target = "dimStatus")
+    @Mapping(source = "dimTipo", target = "dimTipo")
+    @Mapping(source = "quantidade", target = "quantidade")
+    FatoAtividade dtoToFatoAtividade(FatoAtividadeDTO fatoAtividadeDTO);
+
+    List<FatoAtividadeDTO> fatoAtividadeListToDTO(List<FatoAtividade> fatoAtividades);
+    List<FatoAtividade> dtoListToFatoAtividade(List<FatoAtividadeDTO> fatoAtividadeDTOs);
+
+
 
     // Fato Custo Hora (mapeamento direto pois DTO usa entidades)
+    @Mapping(source = "dimProjeto", target = "dimProjeto")
+    @Mapping(source = "dimPeriodo", target = "dimPeriodo")
+    @Mapping(source = "dimDev", target = "dimDev")
+    @Mapping(source = "custo", target = "custo")
+    @Mapping(source = "horas_quantidade", target = "horas_quantidade")
     FatoCustoHoraDTO custoHoraToDTO(FatoCustoHora fatoCustoHora);
+
+    @Mapping(source = "dimProjeto", target = "dimProjeto")
+    @Mapping(source = "dimPeriodo", target = "dimPeriodo")
+    @Mapping(source = "dimDev", target = "dimDev")
+    @Mapping(source = "custo", target = "custo")
+    @Mapping(source = "horas_quantidade", target = "horas_quantidade")
     FatoCustoHora dtoToCustoHora(FatoCustoHoraDTO fatoCustoHoraDTO);
+    
     List<FatoCustoHoraDTO> custoHoraListToDTO(List<FatoCustoHora> fatoCustoHoras);
     List<FatoCustoHora> dtoListToCustoHora(List<FatoCustoHoraDTO> fatoCustoHoraDTOs);
 
-    // Fato Atividade (mapeamento direto pois DTO usa entidades)
-    FatoAtividadeDTO atividadeToDTO(FatoAtividade fatoAtividade);
-    FatoAtividade dtoToAtividade(FatoAtividadeDTO fatoAtividadeDTO);
-    List<FatoAtividadeDTO> atividadeListToDTO(List<FatoAtividade> fatoAtividades);
-    List<FatoAtividade> dtoListToAtividade(List<FatoAtividadeDTO> fatoAtividadeDTOs);
+    
 }

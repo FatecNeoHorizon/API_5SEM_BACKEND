@@ -21,47 +21,115 @@ import com.neohorizon.api.entity.dimensao.DimTipo;
 @Mapper(componentModel = "spring")
 public interface DimensionMapper {
 
-    // Dimensão Desenvolvedor
-    DimDevDTO devToDTO(DimDev dimDev);
-    DimDev dtoToDev(DimDevDTO dimDevDTO);
-    List<DimDevDTO> devListToDTO(List<DimDev> dimDevs);
-    List<DimDev> dtoListToDev(List<DimDevDTO> dimDevDTOs);
-
     // Dimensão Atividade
-    @Mapping(source = "dimProjeto.id", target = "projetoId")
-    @Mapping(source = "dimProjeto.nome", target = "projetoNome")
+    // Entidade -> DTO
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "descricao", target = "descricao")
+    @Mapping(source = "ativo", target = "ativo")
     DimAtividadeDTO atividadeToDTO(DimAtividade dimAtividade);
-    
-    @Mapping(source = "projetoId", target = "dimProjeto.id")
-    @Mapping(target = "dimProjeto.nome", ignore = true)
-    @Mapping(target = "dimProjeto.key", ignore = true)
-    @Mapping(target = "dimProjeto.jira_id", ignore = true)
+
+    // DTO -> Entidade
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "descricao", target = "descricao")
+    @Mapping(source = "ativo", target = "ativo")
     DimAtividade dtoToAtividade(DimAtividadeDTO dimAtividadeDTO);
-    
+
+    // Lista de Dimensão Atividade 
     List<DimAtividadeDTO> atividadeListToDTO(List<DimAtividade> dimAtividades);
     List<DimAtividade> dtoListToAtividade(List<DimAtividadeDTO> dimAtividadeDTOs);
 
+    
+    // Dimensão Desenvolvedor
+    // Entidade -> DTO
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "custo_hora", target = "custo_hora")
+    DimDevDTO devToDTO(DimDev dimDev);
+
+    // DTO -> Entidade
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "custo_hora", target = "custo_hora")
+    DimDev dtoToDev(DimDevDTO dimDevDTO);
+
+    // Lista de Dimensão Desenvolvedor    
+    List<DimDevDTO> devListToDTO(List<DimDev> dimDevs);
+    List<DimDev> dtoListToDev(List<DimDevDTO> dimDevDTOs);
+
     // Dimensão Período
-    DimPeriodoDTO periodoToDTO(DimPeriodo dimPeriodo);
+    // Entidade -> DTO
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "dia", target = "dia")
+    @Mapping(source = "semana", target = "semana")
+    @Mapping(source = "mes", target = "mes")
+    @Mapping(source = "ano", target = "ano")
     DimPeriodo dtoToPeriodo(DimPeriodoDTO dimPeriodoDTO);
-    List<DimPeriodoDTO> periodoListToDTO(List<DimPeriodo> dimPeriodos);
+
+    // DTO -> Entidade
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "dia", target = "dia")
+    @Mapping(source = "semana", target = "semana")
+    @Mapping(source = "mes", target = "mes")
+    @Mapping(source = "ano", target = "ano")
+    DimPeriodoDTO periodoToDTO(DimPeriodo dimPeriodo);
+
+    // Lista de Dimensão Período
     List<DimPeriodo> dtoListToPeriodo(List<DimPeriodoDTO> dimPeriodoDTOs);
+    List<DimPeriodoDTO> periodoListToDTO(List<DimPeriodo> dimPeriodos);
 
     // Dimensão Projeto
-    DimProjetoDTO projetoToDTO(DimProjeto dimProjeto);
+    // Entidade -> DTO
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "key", target = "key")
+    @Mapping(source = "projeto_jira_id", target = "projeto_jira_id")
     DimProjeto dtoToProjeto(DimProjetoDTO dimProjetoDTO);
+    // DTO -> Entidade
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "key", target = "key")
+    @Mapping(source = "projeto_jira_id", target = "projeto_jira_id")
+    DimProjetoDTO projetoToDTO(DimProjeto dimProjeto);
+    
+    // Lista de Dimensão Projeto
     List<DimProjetoDTO> projetoListToDTO(List<DimProjeto> dimProjetos);
     List<DimProjeto> dtoListToProjeto(List<DimProjetoDTO> dimProjetoDTOs);
 
     // Dimensão Status
+    // Entidade -> DTO
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "statusJiraId", target = "statusJiraId")
     DimStatusDTO statusToDTO(DimStatus dimStatus);
+
+    // DTO -> Entidade
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "statusJiraId", target = "statusJiraId")
     DimStatus dtoToStatus(DimStatusDTO dimStatusDTO);
+
+    // Lista de Dimensão Status
     List<DimStatusDTO> statusListToDTO(List<DimStatus> dimStatuss);
     List<DimStatus> dtoListToStatus(List<DimStatusDTO> dimStatusDTOs);
 
     // Dimensão Tipo
+    // Entidade -> DTO
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "descricao", target = "descricao")
+    @Mapping(source = "tipoJiraId", target = "tipoJiraId")
     DimTipoDTO tipoToDTO(DimTipo dimTipo);
+
+    // DTO -> Entidade
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "nome", target = "nome")
+    @Mapping(source = "descricao", target = "descricao")
+    @Mapping(source = "tipoJiraId", target = "tipoJiraId")
     DimTipo dtoToTipo(DimTipoDTO dimTipoDTO);
+
+    // Lista de Dimensão Tipo
     List<DimTipoDTO> tipoListToDTO(List<DimTipo> dimTipos);
     List<DimTipo> dtoListToTipo(List<DimTipoDTO> dimTipoDTOs);
 }
