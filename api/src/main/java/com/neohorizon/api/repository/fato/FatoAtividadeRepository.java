@@ -16,14 +16,14 @@ public interface FatoAtividadeRepository extends JpaRepository<FatoAtividade, Lo
     Long countAllAtividades();
 
     @Query("SELECT new com.neohorizon.api.dto.metrica.ProjectAtividadeCountDTO(dp.nome, SUM(fa.quantidade)) " +
-           "FROM FatoAtividade fa JOIN fa.dimProjeto dp " +
-           "WHERE dp.id = :projectId " +
-           "GROUP BY dp.nome")
+        "FROM FatoAtividade fa JOIN fa.dimProjeto dp " +
+        "WHERE dp.id = :projectId " +
+        "GROUP BY dp.nome")
     List<ProjectAtividadeCountDTO> findAtividadeByProject(@Param("projectId") Long projectId);
 
     @Query("SELECT new com.neohorizon.api.dto.metrica.ProjectAtividadeCountDTO(dp.nome, SUM(fa.quantidade)) " +
-           "FROM FatoAtividade fa JOIN fa.dimProjeto dp " +
-           "GROUP BY dp.nome")
+        "FROM FatoAtividade fa JOIN fa.dimProjeto dp " +
+        "GROUP BY dp.nome")
     List<ProjectAtividadeCountDTO> findAllProjectAtividades();
 
     // Agregações por período - substituindo SQL nativo por JPQL
@@ -75,6 +75,8 @@ public interface FatoAtividadeRepository extends JpaRepository<FatoAtividade, Lo
            "ORDER BY dp.ano")
     List<ProjectAtividadeCountDTO> findAtividadesByAno(
         @Param("anoInicio") Integer anoInicio, @Param("anoFim") Integer anoFim);
+
+    
     
     // Método unificado usando DTO de agregação (seguindo padrão antigo)
     default List<ProjectAtividadeCountDTO> findAtividadesByPeriod(AtividadeAggregationDTO aggregationDTO) {
