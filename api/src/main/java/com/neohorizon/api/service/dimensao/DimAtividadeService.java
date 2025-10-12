@@ -2,7 +2,6 @@ package com.neohorizon.api.service.dimensao;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimAtividadeDTO;
@@ -16,7 +15,6 @@ public class DimAtividadeService {
     private final DimAtividadeRepository dimAtividadeRepository;
     private final DimensionMapper dimensionMapper;
 
-    @Autowired
     public DimAtividadeService(DimAtividadeRepository dimAtividadeRepository,
                               DimensionMapper dimensionMapper) {
         this.dimAtividadeRepository = dimAtividadeRepository;

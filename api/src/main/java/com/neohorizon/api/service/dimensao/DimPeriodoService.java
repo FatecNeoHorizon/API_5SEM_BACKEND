@@ -2,7 +2,6 @@ package com.neohorizon.api.service.dimensao;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
@@ -13,14 +12,13 @@ import com.neohorizon.api.repository.dimensao.DimPeriodoRepository;
 public class DimPeriodoService {
 
     private final DimPeriodoRepository dimPeriodoRepository;
+    private final com.neohorizon.api.mapper.DimensionMapper dimensionMapper;
 
-    @Autowired
-    public DimPeriodoService(DimPeriodoRepository dimPeriodoRepository) {
+    public DimPeriodoService(DimPeriodoRepository dimPeriodoRepository, 
+                            com.neohorizon.api.mapper.DimensionMapper dimensionMapper) {
         this.dimPeriodoRepository = dimPeriodoRepository;
+        this.dimensionMapper = dimensionMapper;
     }
-
-    @Autowired
-    private com.neohorizon.api.mapper.DimensionMapper dimensionMapper;
 
     public List<DimPeriodoDTO> getAllEntities() {
         List<DimPeriodo> entities = dimPeriodoRepository.findAll();

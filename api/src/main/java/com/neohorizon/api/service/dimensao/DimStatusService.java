@@ -3,7 +3,6 @@ package com.neohorizon.api.service.dimensao;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimStatusDTO;
@@ -17,7 +16,6 @@ public class DimStatusService {
     private final DimStatusRepository dimStatusRepository;
     private final DimensionMapper dimensionMapper;
 
-    @Autowired
     public DimStatusService(DimStatusRepository dimStatusRepository, DimensionMapper dimensionMapper) {
         this.dimStatusRepository = dimStatusRepository;
         this.dimensionMapper = dimensionMapper;

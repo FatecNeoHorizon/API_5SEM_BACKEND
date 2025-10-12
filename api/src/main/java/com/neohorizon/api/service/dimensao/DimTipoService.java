@@ -3,7 +3,6 @@ package com.neohorizon.api.service.dimensao;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimTipoDTO;
@@ -17,7 +16,6 @@ public class DimTipoService {
     private final DimTipoRepository dimTipoRepository;
     private final DimensionMapper dimensionMapper;
 
-    @Autowired
     public DimTipoService(DimTipoRepository dimTipoRepository, DimensionMapper dimensionMapper) {
         this.dimTipoRepository = dimTipoRepository;
         this.dimensionMapper = dimensionMapper;
