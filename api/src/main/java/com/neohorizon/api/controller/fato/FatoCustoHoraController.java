@@ -89,10 +89,7 @@ public class FatoCustoHoraController extends BaseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntities(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description) {
-
+    public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntities() {
         List<FatoCustoHoraDTO> fatoCustoHoraDTOs = service.getAllEntities();
         return ok(fatoCustoHoraDTOs);
     }

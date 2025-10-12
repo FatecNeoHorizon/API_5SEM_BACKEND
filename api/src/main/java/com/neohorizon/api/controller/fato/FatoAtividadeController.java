@@ -31,10 +31,7 @@ public class FatoAtividadeController extends BaseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FatoAtividadeDTO>> getAllEntities(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description) {
-
+    public ResponseEntity<List<FatoAtividadeDTO>> getAllEntities() {
         List<FatoAtividadeDTO> fatoAtividadeDTOs = fatoAtividadeService.getAllEntities();
         return ok(fatoAtividadeDTOs);
     }

@@ -29,7 +29,7 @@ public class DimAtividadeController extends BaseController {
     }
 
    @GetMapping
-   public ResponseEntity<List<DimAtividadeDTO>> getAllEntities(@RequestBody(required = false) String filter) {
+   public ResponseEntity<List<DimAtividadeDTO>> getAllEntities() {
        List<DimAtividadeDTO> dimAtividadeDTOs = dimAtividadeService.getAllEntities();
        return ok(dimAtividadeDTOs);
    }
@@ -46,7 +46,7 @@ public class DimAtividadeController extends BaseController {
     @PostMapping
     public ResponseEntity<DimAtividadeDTO> addDimAtividade(@RequestBody DimAtividadeDTO dimAtividadeDTO) {
         DimAtividadeDTO createdEntity = dimAtividadeService.save(dimAtividadeDTO);
-        return ok(createdEntity);
+        return created(createdEntity);
     }
 
     @PutMapping("/{id}")

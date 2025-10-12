@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.neohorizon.api.controller.comum.BaseController;
@@ -30,10 +29,7 @@ public class DimPeriodoController extends BaseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DimPeriodoDTO>> getAllEntities(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description) {
-
+    public ResponseEntity<List<DimPeriodoDTO>> getAllEntities() {
         List<DimPeriodoDTO> dimPeriodoDTOs = dimPeriodoService.getAllEntities();
         return ok(dimPeriodoDTOs);
     }
