@@ -43,12 +43,6 @@ public class DimAtividadeController extends BaseController {
         return ok(dimAtividadeDTO);
     }
 
-    @GetMapping("/projeto/{projetoId}")
-    public ResponseEntity<List<DimAtividadeDTO>> getAtividadesByProjeto(@PathVariable Long projetoId) {
-        List<DimAtividadeDTO> atividades = dimAtividadeService.findByProjetoId(projetoId);
-        return ok(atividades);
-    }
-
     @PostMapping
     public ResponseEntity<DimAtividadeDTO> addDimAtividade(@RequestBody DimAtividadeDTO dimAtividadeDTO) {
         DimAtividadeDTO createdEntity = dimAtividadeService.save(dimAtividadeDTO);

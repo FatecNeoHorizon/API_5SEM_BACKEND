@@ -55,7 +55,7 @@ public class FatoApontamentoHorasController extends BaseController {
         return ok(apontamentos);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<FatoApontamentoHorasDTO> addFatoApontamentoHoras(@RequestBody FatoApontamentoHorasDTO fatoApontamentoHorasDTO) {
         FatoApontamentoHorasDTO createdEntity = fatoApontamentoHorasService.create(fatoApontamentoHorasDTO);
         return created(createdEntity);

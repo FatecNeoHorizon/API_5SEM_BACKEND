@@ -45,4 +45,5 @@ public class MetricsController extends BaseController {
         List<DevHoursMetricsDTO> metrics = devHoursMetricsService.getDevHoursMetrics(devId, activityId, fromDate, toDate);
         return ok(metrics);
     }
+
 }
