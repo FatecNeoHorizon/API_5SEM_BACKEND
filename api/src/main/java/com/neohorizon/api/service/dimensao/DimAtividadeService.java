@@ -7,24 +7,19 @@ import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimAtividadeDTO;
 import com.neohorizon.api.entity.dimensao.DimAtividade;
-import com.neohorizon.api.entity.dimensao.DimProjeto;
 import com.neohorizon.api.mapper.DimensionMapper;
 import com.neohorizon.api.repository.dimensao.DimAtividadeRepository;
-import com.neohorizon.api.repository.dimensao.DimProjetoRepository;
 
 @Service
 public class DimAtividadeService {
 
     private final DimAtividadeRepository dimAtividadeRepository;
-    private final DimProjetoRepository dimProjetoRepository;
     private final DimensionMapper dimensionMapper;
 
     @Autowired
-    public DimAtividadeService(DimAtividadeRepository dimAtividadeRepository, 
-                              DimProjetoRepository dimProjetoRepository,
+    public DimAtividadeService(DimAtividadeRepository dimAtividadeRepository,
                               DimensionMapper dimensionMapper) {
         this.dimAtividadeRepository = dimAtividadeRepository;
-        this.dimProjetoRepository = dimProjetoRepository;
         this.dimensionMapper = dimensionMapper;
     }
 
@@ -38,11 +33,6 @@ public class DimAtividadeService {
         return entity != null ? dimensionMapper.atividadeToDTO(entity) : null;
     }
 
-    public List<DimAtividadeDTO> findByProjetoId(Long projetoId) {
-        List<DimAtividade> entities = dimAtividadeRepository.findByProjetoIdAndAtivoTrue(projetoId);
-        return dimensionMapper.atividadeListToDTO(entities);
-    }
-
     public DimAtividadeDTO save(DimAtividadeDTO dto) {
         DimAtividade entity = dimensionMapper.dtoToAtividade(dto);
         DimAtividade savedEntity = dimAtividadeRepository.save(entity);
@@ -50,25 +40,17 @@ public class DimAtividadeService {
     }
 
     public DimAtividadeDTO update(Long id, DimAtividadeDTO dto) {
-        DimAtividade existingEntity = dimAtividadeRepository.findById(id).orElse(null);
-        if (existingEntity != null) {
-            existingEntity.setNome(dto.getNome());
-            existingEntity.setDescricao(dto.getDescricao());
-            existingEntity.setAtivo(dto.getAtivo());
-            
-            if (dto.getProjetoId() != null) {
-                DimProjeto projeto = dimProjetoRepository.findById(dto.getProjetoId()).orElse(null);
-                existingEntity.setDimProjeto(projeto);
-            }
-            
-            DimAtividade updatedEntity = dimAtividadeRepository.save(existingEntity);
-            return dimensionMapper.atividadeToDTO(updatedEntity);
-        }
-        return null;
+        DimAtividade existingEntity = dimAtividadeRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("DimAtividade com ID " + id + " não encontrado."));
+        existingEntity.setNome(dto.getNome());
+        existingEntity.setDescricao(dto.getDescricao());
+        existingEntity.setAtivo(dto.getAtivo());
+        DimAtividade updatedEntity = dimAtividadeRepository.save(existingEntity);
+        return dimensionMapper.atividadeToDTO(updatedEntity);
     }
 
+    // Soft delete - marca como inativo
     public void deleteById(Long id) {
-        // Soft delete - marca como inativo
         DimAtividade entity = dimAtividadeRepository.findById(id).orElse(null);
         if (entity != null) {
             entity.setAtivo(false);

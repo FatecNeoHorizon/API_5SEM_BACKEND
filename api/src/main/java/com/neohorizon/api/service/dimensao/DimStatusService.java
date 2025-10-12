@@ -44,10 +44,10 @@ public class DimStatusService {
 
     public DimStatusDTO update(Long id, DimStatusDTO dimStatusDTO) {
         DimStatus existingEntity = dimStatusRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("DimStatus with ID " + id + " not found."));
+                .orElseThrow(() -> new IllegalArgumentException("DimStatus com ID " + id + " não encontrado."));
 
         existingEntity.setNome(dimStatusDTO.getNome());
-        existingEntity.setDescricao(dimStatusDTO.getDescricao());
+        existingEntity.setStatusJiraId(dimStatusDTO.getStatusJiraId());
 
         DimStatus updatedEntity = dimStatusRepository.save(existingEntity);
         return dimensionMapper.statusToDTO(updatedEntity);

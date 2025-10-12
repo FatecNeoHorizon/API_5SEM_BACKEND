@@ -44,10 +44,11 @@ public class DimTipoService {
 
     public DimTipoDTO update(Long id, DimTipoDTO dimTipoDTO) {
         DimTipo existingEntity = dimTipoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("DimTipo with ID " + id + " not found."));
+                .orElseThrow(() -> new IllegalArgumentException("DimTipo com ID " + id + " não encontrado."));
 
         existingEntity.setNome(dimTipoDTO.getNome());
         existingEntity.setDescricao(dimTipoDTO.getDescricao());
+        existingEntity.setTipoJiraId(dimTipoDTO.getTipoJiraId());
 
         DimTipo updatedEntity = dimTipoRepository.save(existingEntity);
         return dimensionMapper.tipoToDTO(updatedEntity);

@@ -48,91 +48,79 @@ public class DevHoursMetricsService {
                 .toList();
     }
 
-    /**
-     * OTIMIZAÇÃO: Método otimizado para processar apontamentos de um desenvolvedor
-     * Evita loops aninhados e múltiplas iterações
-     */
-    private DevHoursMetricsDTO processDevApontamentos(List<FatoApontamentoHoras> devApontamentos) {
+       private DevHoursMetricsDTO processDevApontamentos(List<FatoApontamentoHoras> devApontamentos) {
         if (devApontamentos.isEmpty()) {
             return null;
         }
-        
+    
         DimDev dev = devApontamentos.get(0).getDimDev();
-        
-        // OTIMIZAÇÃO: Calcular totais e agrupar em uma única passada
+    
         Map<Long, List<DevHoursMetricsDTO.DiaHorasDTO>> atividadeMap = new HashMap<>();
         Map<Long, Double> horasPorAtividade = new HashMap<>();
         Map<Long, DimAtividade> atividadeCache = new HashMap<>();
         double totalHorasGeral = 0.0;
-        
+    
         for (FatoApontamentoHoras apontamento : devApontamentos) {
             Long atividadeId = apontamento.getDimAtividade().getId();
             double horas = apontamento.getHorasTrabalhadas();
-            
+    
             totalHorasGeral += horas;
             horasPorAtividade.merge(atividadeId, horas, Double::sum);
             atividadeCache.putIfAbsent(atividadeId, apontamento.getDimAtividade());
-            
+    
             DevHoursMetricsDTO.DiaHorasDTO diaDTO = DevHoursMetricsDTO.DiaHorasDTO.builder()
-                    .data(apontamento.getDataApontamento())
-                    .horas(horas)
-                    .descricaoTrabalho(apontamento.getDescricaoTrabalho())
-                    .build();
-                    
+                .data(apontamento.getDataAtualizacao().toLocalDate())
+                .horas(horas)
+                .descricaoTrabalho(apontamento.getDescricaoTrabalho())
+                .build();
+    
             atividadeMap.computeIfAbsent(atividadeId, k -> new ArrayList<>()).add(diaDTO);
         }
-        
-        // OTIMIZAÇÃO: Construir DTOs de atividade de forma eficiente
-        List<DevHoursMetricsDTO.AtividadeHorasDTO> atividades = atividadeMap.entrySet()
-                .parallelStream()
-                .map(entry -> {
-                    Long atividadeId = entry.getKey();
-                    List<DevHoursMetricsDTO.DiaHorasDTO> dias = entry.getValue();
-                    DimAtividade atividade = atividadeCache.get(atividadeId);
-                    
-                    // Ordenar dias por data (mais recente primeiro)
-                    dias.sort(Comparator.comparing(DevHoursMetricsDTO.DiaHorasDTO::getData).reversed());
-                    
-                    return DevHoursMetricsDTO.AtividadeHorasDTO.builder()
-                            .atividadeId(atividadeId)
-                            .atividadeNome(atividade.getNome())
-                            .projetoNome(atividade.getDimProjeto().getNome())
-                            .totalHoras(horasPorAtividade.get(atividadeId))
-                            .diasApontamentos(dias)
-                            .build();
-                })
-                .sorted(Comparator.comparing(DevHoursMetricsDTO.AtividadeHorasDTO::getAtividadeNome))
-                .toList();
-
+    
+        List<DevHoursMetricsDTO.AtividadeHorasDTO> atividades = atividadeMap.entrySet().stream()
+            .map(entry -> {
+                Long atividadeId = entry.getKey();
+                List<DevHoursMetricsDTO.DiaHorasDTO> dias = entry.getValue();
+                DimAtividade atividade = atividadeCache.get(atividadeId);
+    
+                String atividadeNome = atividade != null ? atividade.getNome() : "Atividade desconhecida";
+                Double totalHoras = horasPorAtividade.get(atividadeId);
+                if (totalHoras == null) {
+                    totalHoras = 0.0;
+                }
+    
+                return DevHoursMetricsDTO.AtividadeHorasDTO.builder()
+                    .atividadeId(atividadeId)
+                    .atividadeNome(atividadeNome)
+                    .totalHoras(totalHoras)
+                    .diasApontamentos(dias)
+                    .build();
+            })
+            .sorted(Comparator.comparing(DevHoursMetricsDTO.AtividadeHorasDTO::getAtividadeNome))
+            .toList();
+    
         return DevHoursMetricsDTO.builder()
-                .devId(dev.getId())
-                .devNome(dev.getNome())
-                .devEmail(dev.getEmail())
-                .totalHoras(totalHorasGeral)
-                .atividades(atividades)
-                .build();
+            .devId(dev.getId())
+            .devNome(dev.getNome())
+            .totalHoras(totalHorasGeral)
+            .atividades(atividades)
+            .build();
     }
 
     private List<FatoApontamentoHoras> getApontamentosByFilters(Long devId, Long activityId, 
                                                               LocalDate fromDate, LocalDate toDate) {
-        
-        // Se não especificou datas, usar últimos 30 dias
-        if (fromDate == null) {
-            fromDate = LocalDate.now().minusDays(30);
-        }
-        if (toDate == null) {
-            toDate = LocalDate.now();
-        }
+        // Converter LocalDate para LocalDateTime (início do dia e fim do dia)
+        java.time.LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : LocalDate.now().minusDays(30).atStartOfDay();
+        java.time.LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
 
-        // Aplicar filtros baseado nos parâmetros
         if (devId != null && activityId != null) {
-            return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(devId, activityId, fromDate, toDate);
+            return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(devId, activityId, fromDateTime, toDateTime);
         } else if (devId != null) {
-            return fatoApontamentoHorasRepository.findByDevAndPeriodo(devId, fromDate, toDate);
+            return fatoApontamentoHorasRepository.findByDevAndPeriodo(devId, fromDateTime, toDateTime);
         } else if (activityId != null) {
-            return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(activityId, fromDate, toDate);
+            return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(activityId, fromDateTime, toDateTime);
         } else {
-            return fatoApontamentoHorasRepository.findByPeriodo(fromDate, toDate);
+            return fatoApontamentoHorasRepository.findByPeriodo(fromDateTime, toDateTime);
         }
     }
 }

@@ -44,11 +44,11 @@ public class DimProjetoService {
 
     public DimProjetoDTO update(Long id, DimProjetoDTO dimProjetoDTO) {
         DimProjeto existingEntity = dimProjetoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("DimProjeto with ID " + id + " not found."));
+                .orElseThrow(() -> new IllegalArgumentException("DimProjeto com ID " + id + " não encontrado."));
 
         existingEntity.setNome(dimProjetoDTO.getNome());
         existingEntity.setKey(dimProjetoDTO.getKey());
-        existingEntity.setJira_id(dimProjetoDTO.getJira_id());
+        existingEntity.setProjeto_jira_id(dimProjetoDTO.getProjeto_jira_id());
 
         DimProjeto updatedEntity = dimProjetoRepository.save(existingEntity);
         return dimensionMapper.projetoToDTO(updatedEntity);

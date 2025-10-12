@@ -29,34 +29,29 @@ public class FatoAtividadeService {
 
         return fatoAtividadeRepository.findAll()
                 .stream()
-                .map(fatoMapper::atividadeToDTO)
+                .map(fatoMapper::fatoAtividadeToDTO)
                 .collect(Collectors.toList());
     }
 
     public FatoAtividadeDTO findById(Long id) {
         return fatoAtividadeRepository.findById(id)
-                .map(fatoMapper::atividadeToDTO)
+                .map(fatoMapper::fatoAtividadeToDTO)
                 .orElse(null);
     }
 
     public FatoAtividadeDTO save(FatoAtividadeDTO fatoAtividadeDTO) {
-        FatoAtividade fatoAtividade = fatoMapper.dtoToAtividade(fatoAtividadeDTO);
+        FatoAtividade fatoAtividade = fatoMapper.dtoToFatoAtividade(fatoAtividadeDTO);
         FatoAtividade savedEntity = fatoAtividadeRepository.save(fatoAtividade);
-        return fatoMapper.atividadeToDTO(savedEntity);
+        return fatoMapper.fatoAtividadeToDTO(savedEntity);
     }
 
     public FatoAtividadeDTO update(Long id, FatoAtividadeDTO fatoAtividadeDTO) {
         FatoAtividade existingEntity = fatoAtividadeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("FatoAtividade with ID " + id + " not found."));
-
-        existingEntity.setDimProjeto(fatoAtividadeDTO.getDimProjeto());
-        existingEntity.setDimPeriodo(fatoAtividadeDTO.getDimPeriodo());
-        existingEntity.setDimStatus(fatoAtividadeDTO.getDimStatus());
-        existingEntity.setDimTipo(fatoAtividadeDTO.getDimTipo());
         existingEntity.setQuantidade(fatoAtividadeDTO.getQuantidade());
 
         FatoAtividade updatedEntity = fatoAtividadeRepository.save(existingEntity);
-        return fatoMapper.atividadeToDTO(updatedEntity);
+        return fatoMapper.fatoAtividadeToDTO(updatedEntity);
     }
 
     public void deleteById(Long id) {
@@ -68,8 +63,11 @@ public class FatoAtividadeService {
     }
 
     public List<ProjectAtividadeCountDTO> getAtividadesByProject(Long projectId) {
-        return fatoAtividadeRepository.findAtividadeByProject(projectId);
-    }
+            if (projectId != null) {
+                return fatoAtividadeRepository.findAtividadeByProject(projectId);
+            } 
+            return fatoAtividadeRepository.findAllProjectAtividades();
+        }
 
     public List<ProjectAtividadeCountDTO> getAllProjectAtividades() {
         return fatoAtividadeRepository.findAllProjectAtividades();

@@ -27,8 +27,7 @@ public class DimDevService {
     }
 
     public List<DimDevDTO> getAllEntities() {
-        // OTIMIZAÇÃO: parallelStream() para conversões em massa com MapStruct
-        return dimDevRepository.findAll().parallelStream()
+        return dimDevRepository.findAll().stream()
                 .map(dimensionMapper::devToDTO)
                 .toList();
     }
@@ -43,12 +42,11 @@ public class DimDevService {
         return dimDevRepository.findById(id)
                 .map(existingEntity -> {
                     existingEntity.setNome(dimDevDTO.getNome());
-                    existingEntity.setEmail(dimDevDTO.getEmail());
-                    existingEntity.setAtivo(dimDevDTO.getAtivo());
+                    existingEntity.setCusto_hora(dimDevDTO.getCusto_hora());
                     DimDev updatedEntity = dimDevRepository.save(existingEntity);
                     return dimensionMapper.devToDTO(updatedEntity);
                 })
-                .orElse(null);
+                .orElseThrow(() -> new IllegalArgumentException("DimDev com ID " + id + " não encontrado."));
     }
 
     public boolean delete(Long id) {

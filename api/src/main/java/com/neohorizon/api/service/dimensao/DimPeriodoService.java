@@ -1,14 +1,13 @@
 package com.neohorizon.api.service.dimensao;
 
-import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
-import com.neohorizon.api.entity.dimensao.DimPeriodo;
-import com.neohorizon.api.repository.dimensao.DimPeriodoRepository;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
+import com.neohorizon.api.entity.dimensao.DimPeriodo;
+import com.neohorizon.api.repository.dimensao.DimPeriodoRepository;
 
 @Service
 public class DimPeriodoService {
@@ -20,66 +19,40 @@ public class DimPeriodoService {
         this.dimPeriodoRepository = dimPeriodoRepository;
     }
 
+    @Autowired
+    private com.neohorizon.api.mapper.DimensionMapper dimensionMapper;
+
     public List<DimPeriodoDTO> getAllEntities() {
-        return dimPeriodoRepository.findAll()
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        List<DimPeriodo> entities = dimPeriodoRepository.findAll();
+        return dimensionMapper.periodoListToDTO(entities);
     }
 
     public DimPeriodoDTO findById(Long id) {
         return dimPeriodoRepository.findById(id)
-                .map(this::convertToDTO)
+                .map(dimensionMapper::periodoToDTO)
                 .orElse(null);
     }
 
     public DimPeriodoDTO save(DimPeriodoDTO dimPeriodoDTO) {
-        DimPeriodo dimPeriodo = convertToEntity(dimPeriodoDTO);
+        DimPeriodo dimPeriodo = dimensionMapper.dtoToPeriodo(dimPeriodoDTO);
         DimPeriodo savedEntity = dimPeriodoRepository.save(dimPeriodo);
-        return convertToDTO(savedEntity);
+        return dimensionMapper.periodoToDTO(savedEntity);
     }
 
     public DimPeriodoDTO update(Long id, DimPeriodoDTO dimPeriodoDTO) {
         DimPeriodo existingEntity = dimPeriodoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("DimPeriodo with ID " + id + " not found."));
-
+            .orElseThrow(() -> new IllegalArgumentException("DimPeriodo com ID " + id + " não encontrado."));
+    
         existingEntity.setDia(dimPeriodoDTO.getDia());
         existingEntity.setSemana(dimPeriodoDTO.getSemana());
         existingEntity.setMes(dimPeriodoDTO.getMes());
         existingEntity.setAno(dimPeriodoDTO.getAno());
-
+    
         DimPeriodo updatedEntity = dimPeriodoRepository.save(existingEntity);
-        return convertToDTO(updatedEntity);
+        return dimensionMapper.periodoToDTO(updatedEntity);
     }
-
+    
     public void deleteById(Long id) {
         dimPeriodoRepository.deleteById(id);
-    }
-
-    private DimPeriodoDTO convertToDTO(DimPeriodo entity) {
-        if (entity == null) {
-            return null;
-        }
-        DimPeriodoDTO dto = new DimPeriodoDTO();
-        dto.setId(entity.getId());
-        dto.setDia(entity.getDia());
-        dto.setSemana(entity.getSemana());
-        dto.setMes(entity.getMes());
-        dto.setAno(entity.getAno());
-        return dto;
-    }
-
-    private DimPeriodo convertToEntity(DimPeriodoDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        DimPeriodo entity = new DimPeriodo();
-        entity.setId(dto.getId());
-
-        entity.setDia(dto.getDia());
-        entity.setSemana(dto.getSemana());
-        entity.setMes(dto.getMes());
-        entity.setAno(dto.getAno());
-        return entity;
     }
 }
