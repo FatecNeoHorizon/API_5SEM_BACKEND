@@ -1,5 +1,7 @@
 package com.neohorizon.api.dto.metrica;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProjectAtividadeCountDTO {
     private String projectName;
-    private long totalAtividades;
+    private BigDecimal totalAtividades;
 }

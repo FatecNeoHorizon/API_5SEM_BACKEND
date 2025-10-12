@@ -16,9 +16,9 @@ public class DimStatusDTO {
     @Schema(description = "ID do status (apenas leitura)", example = "1")
     private Long id;
     
-    @Schema(description = "Nome do status", example = "Em Progresso", required = true)
+    @Schema(description = "Nome do status", example = "Em Progresso", requiredMode = Schema.RequiredMode.REQUIRED)
     private String nome;
     
-    @Schema(description = "Descrição do status", example = "Task está sendo desenvolvida")
-    private String descricao;
+    @Schema(description = "ID do status no Jira", example = "3")
+    private String statusJiraId;
 }

@@ -1,5 +1,7 @@
 package com.neohorizon.api.dto.response.fato;
 
+import java.math.BigDecimal;
+
 import com.neohorizon.api.entity.dimensao.DimDev;
 import com.neohorizon.api.entity.dimensao.DimPeriodo;
 import com.neohorizon.api.entity.dimensao.DimProjeto;
@@ -17,6 +19,6 @@ public class FatoCustoHoraDTO {
     private DimProjeto dimProjeto;
     private DimPeriodo dimPeriodo;
     private DimDev dimDev;
-    private Integer custo;
-    private Integer horas_quantidade;
+    private BigDecimal custo;
+    private BigDecimal horas_quantidade;
 }

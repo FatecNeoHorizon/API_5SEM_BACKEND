@@ -16,12 +16,12 @@ public class DimProjetoDTO {
     @Schema(description = "ID do projeto (apenas leitura)", example = "1")
     private Long id;
     
-    @Schema(description = "Nome do projeto", example = "Neo Horizon", required = true)
+    @Schema(description = "Nome do projeto", example = "Neo Horizon", requiredMode = Schema.RequiredMode.REQUIRED)
     private String nome;
     
-    @Schema(description = "Chave única do projeto", example = "NEOHZ", required = true)
+    @Schema(description = "Chave única do projeto", example = "NEOHZ", requiredMode = Schema.RequiredMode.REQUIRED)
     private String key;
     
     @Schema(description = "ID do projeto no JIRA", example = "JIRA-2001")
-    private String jira_id;
+    private String projeto_jira_id;
 }

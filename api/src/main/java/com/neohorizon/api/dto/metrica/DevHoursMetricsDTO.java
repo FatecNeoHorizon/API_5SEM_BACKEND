@@ -16,7 +16,6 @@ public class DevHoursMetricsDTO {
 
     private Long devId;
     private String devNome;
-    private String devEmail;
     private Double totalHoras;
     private List<AtividadeHorasDTO> atividades;
     

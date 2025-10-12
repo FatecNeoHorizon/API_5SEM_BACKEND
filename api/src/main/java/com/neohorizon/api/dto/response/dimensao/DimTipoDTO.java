@@ -16,9 +16,12 @@ public class DimTipoDTO {
     @Schema(description = "ID do tipo (apenas leitura)", example = "1")
     private Long id;
     
-    @Schema(description = "Nome do tipo", example = "Desenvolvimento", required = true)
+    @Schema(description = "Nome do tipo", example = "Desenvolvimento", requiredMode = Schema.RequiredMode.REQUIRED)
     private String nome;
     
     @Schema(description = "Descrição do tipo", example = "Implementação de funcionalidades")
     private String descricao;
+
+    @Schema(description = "ID do tipo no Jira", example = "10001")
+    private String tipoJiraId;
 }

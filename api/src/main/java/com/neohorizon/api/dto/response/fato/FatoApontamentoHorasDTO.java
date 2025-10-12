@@ -1,7 +1,11 @@
 package com.neohorizon.api.dto.response.fato;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.neohorizon.api.dto.response.dimensao.DimAtividadeDTO;
+import com.neohorizon.api.dto.response.dimensao.DimDevDTO;
+import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
+import com.neohorizon.api.dto.response.dimensao.DimProjetoDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,13 +19,10 @@ import lombok.NoArgsConstructor;
 public class FatoApontamentoHorasDTO {
 
     private Long id;
-    private Long devId;
-    private String devNome;
-    private Long atividadeId;
-    private String atividadeNome;
-    private Long projetoId;
-    private String projetoNome;
-    private LocalDate dataApontamento;
+    private DimPeriodoDTO dimPeriodo;
+    private DimDevDTO dimDev;
+    private DimAtividadeDTO dimAtividade;
+    private DimProjetoDTO dimProjeto;
     private Double horasTrabalhadas;
     private String descricaoTrabalho;
     private LocalDateTime dataCriacao;

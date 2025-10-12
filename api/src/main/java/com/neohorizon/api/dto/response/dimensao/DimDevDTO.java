@@ -16,22 +16,9 @@ public class DimDevDTO {
     @Schema(description = "ID do desenvolvedor (apenas leitura)", example = "1")
     private Long id;
     
-    @Schema(description = "Nome do desenvolvedor", example = "Alice Souza", required = true)
+    @Schema(description = "Nome do desenvolvedor", example = "Alice Souza", requiredMode = Schema.RequiredMode.REQUIRED)
     private String nome;
-    
-    @Schema(description = "Email do desenvolvedor", example = "alice@empresa.com")
-    private String email;
-    
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @Schema(description = "Senha do desenvolvedor (apenas escrita)", example = "senha123")
-    private String senha;
-    
-    @Schema(description = "Função/cargo do desenvolvedor", example = "Backend")
-    private String role;
-    
-    @Schema(description = "Custo por hora em reais", example = "120")
-    private Integer custo_hora;
-    
-    @Schema(description = "Se o desenvolvedor está ativo", example = "true")
-    private Boolean ativo;
+      
+    @Schema(description = "Custo por hora em reais", example = "120.00")
+    private java.math.BigDecimal custo_hora;
 }
