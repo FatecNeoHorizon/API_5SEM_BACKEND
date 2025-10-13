@@ -24,18 +24,15 @@ public class ConvertStringToInteger {
             throw new IllegalArgumentException("Formato de data inválido. Esperado 'AAAA-MM-DD'. Recebido: '" + value + "'");
         }
 
-        Integer[] intParts = new Integer[3];
-
         try {
-            intParts[0] = Integer.parseInt(parts[0]);
-            intParts[1] = Integer.parseInt(parts[1]);
-            intParts[2] = Integer.parseInt(parts[2]);
-
+            return new Integer[] {
+                Integer.valueOf(parts[0]),
+                Integer.valueOf(parts[1]),
+                Integer.valueOf(parts[2])
+            };
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(
                 "Um ou mais componentes da data não são números válidos. Esperado: AAAA-MM-DD. Recebido: '" + value + "'", e);
         }
-
-        return intParts;
     }
 }
