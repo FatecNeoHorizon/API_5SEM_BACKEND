@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.neohorizon.api.controller.comum.BaseController;
@@ -59,6 +60,33 @@ public class DimPeriodoController extends BaseController {
     public ResponseEntity<Void> deleteDimPeriodo(@PathVariable Long id) {
         dimPeriodoService.deleteById(id);
         return noContent();
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<DimPeriodoDTO>> getAllEntitiesByFilter(
+            @RequestParam("dia") Integer dia,
+            @RequestParam("semana") Integer semana,
+            @RequestParam("mes") Integer mes,
+            @RequestParam("ano") Integer ano) {
+
+        if (dia == 0) {
+            dia = null;
+        }
+
+        if (semana == 0) {
+            semana = null;
+        }
+
+        if (mes == 0) {
+            mes = null;
+        }
+
+        if (ano == 0) {
+            ano = null;
+        }
+
+        List<DimPeriodoDTO> dimPeriodoDTOs = dimPeriodoService.getAllEntitiesByFilter(dia, semana, mes, ano);
+        return ok(dimPeriodoDTOs);
     }
 
 }

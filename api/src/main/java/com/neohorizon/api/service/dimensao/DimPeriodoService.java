@@ -1,6 +1,7 @@
 package com.neohorizon.api.service.dimensao;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -52,5 +53,14 @@ public class DimPeriodoService {
     
     public void deleteById(Long id) {
         dimPeriodoRepository.deleteById(id);
+    }
+
+      public List<DimPeriodoDTO> getAllEntitiesByFilter(Integer dia, Integer semana, Integer mes, Integer ano)
+    {
+        return dimPeriodoRepository.findByDiaAndSemanaAndMesAndAno(dia, semana, mes, ano)
+                .parallelStream()
+                .map(dimensionMapper::periodoToDTO)
+                .collect(Collectors.toList());
+
     }
 }
