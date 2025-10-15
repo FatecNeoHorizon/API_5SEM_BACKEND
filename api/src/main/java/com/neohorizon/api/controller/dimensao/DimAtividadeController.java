@@ -1,13 +1,5 @@
 package com.neohorizon.api.controller.dimensao;
 
-import com.neohorizon.api.dto.DimAtividadeDTO;
-import com.neohorizon.api.service.dimensao.DimAtividadeService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
