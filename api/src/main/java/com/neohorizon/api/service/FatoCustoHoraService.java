@@ -40,13 +40,13 @@ public class FatoCustoHoraService {
     public List<CustoPorProjetoDTO> obterTotalPorProjeto() {
         return repo.totalPorProjetoRaw().stream()
                 .map(r -> new CustoPorProjetoDTO((Long) r[0], (String) r[1], nz((Number) r[2])))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<CustoHorasPorDevDTO> obterTotalPorDev() {
         return repo.totalPorDevRaw().stream()
                 .map(r -> new CustoHorasPorDevDTO((Long) r[0], (String) r[1], nz((Number) r[2]), nz((Number) r[3])))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public List<EvolucaoCustoDTO> obterEvolucao(String granularidade) {
@@ -54,22 +54,22 @@ public class FatoCustoHoraService {
         return switch (g) {
             case "ano" -> repo.evolucaoAnoRaw().stream()
                     .map(r -> new EvolucaoCustoDTO(String.valueOf((Integer) r[0]), nz((Number) r[1])))
-                    .collect(Collectors.toList());
+                    .toList();
             case "semana" -> repo.evolucaoSemanaRaw().stream()
                     .map(r -> new EvolucaoCustoDTO(((Integer) r[0]) + "-S" + ((Integer) r[1]), nz((Number) r[2])))
-                    .collect(Collectors.toList());
+                    .toList();
             case "dia" -> repo.evolucaoDiaRaw().stream()
                     .map(r -> new EvolucaoCustoDTO(
                             String.format("%04d-%02d-%02d", (Integer) r[0], (Integer) r[1], (Integer) r[2]),
                             nz((Number) r[3])
                     ))
-                    .collect(Collectors.toList());
+                    .toList();
             default -> repo.evolucaoMesRaw().stream()
                     .map(r -> new EvolucaoCustoDTO(
                             monthLabel((Integer) r[1]) + "/" + ((Integer) r[0]),
                             nz((Number) r[2])
                     ))
-                    .collect(Collectors.toList());
+                    .toList();
         };
     }
 
@@ -101,7 +101,7 @@ public class FatoCustoHoraService {
         return repo.findByDimProjetoAndDimPeriodoAndDimDev(dimProjeto, dimPeriodo, dimDev)
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
 
     }
 
@@ -109,7 +109,7 @@ public class FatoCustoHoraService {
         return repo.findAll()
         .stream()
         .map(this::convertToDTO)
-        .collect(Collectors.toList());
+        .toList();
      }
 
      public FatoCustoHoraDTO findById(Long id) {
