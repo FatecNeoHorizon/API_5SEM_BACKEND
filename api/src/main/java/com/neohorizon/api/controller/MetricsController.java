@@ -1,7 +1,7 @@
 package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.DevHoursMetricsDTO;
-import com.neohorizon.api.service.DevHoursMetricsService;
+import com.neohorizon.api.service.metrica.DevHoursMetricsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;

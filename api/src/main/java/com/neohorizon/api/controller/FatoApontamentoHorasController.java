@@ -1,7 +1,7 @@
 package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoApontamentoHorasDTO;
-import com.neohorizon.api.service.FatoApontamentoHorasService;
+import com.neohorizon.api.service.fato.FatoApontamentoHorasService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;

@@ -1,4 +1,4 @@
-package com.neohorizon.api.service;
+package com.neohorizon.api.service.dimensao;
 
 import com.neohorizon.api.dto.DimTipoDTO;
 import com.neohorizon.api.entity.DimTipo;

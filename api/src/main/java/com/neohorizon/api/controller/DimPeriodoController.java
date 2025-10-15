@@ -1,7 +1,7 @@
 package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.DimPeriodoDTO;
-import com.neohorizon.api.service.DimPeriodoService;
+import com.neohorizon.api.service.dimensao.DimPeriodoService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

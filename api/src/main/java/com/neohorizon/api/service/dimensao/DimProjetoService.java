@@ -1,4 +1,4 @@
-package com.neohorizon.api.service;
+package com.neohorizon.api.service.dimensao;
 
 import com.neohorizon.api.dto.DimProjetoDTO;
 import com.neohorizon.api.entity.DimProjeto;

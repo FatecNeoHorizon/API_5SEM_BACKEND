@@ -2,7 +2,7 @@ package com.neohorizon.api.controller;
 
 import com.neohorizon.api.dto.FatoIssueDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
-import com.neohorizon.api.service.FatoIssueService;
+import com.neohorizon.api.service.fato.FatoIssueService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

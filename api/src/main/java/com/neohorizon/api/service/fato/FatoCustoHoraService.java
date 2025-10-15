@@ -1,5 +1,5 @@
 // src/main/java/com/neohorizon/api/service/FatoCustoHoraService.java
-package com.neohorizon.api.service;
+package com.neohorizon.api.service.fato;
 
 import java.util.List;
 import java.util.Locale;

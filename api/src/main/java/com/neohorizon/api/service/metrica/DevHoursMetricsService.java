@@ -1,4 +1,4 @@
-package com.neohorizon.api.service;
+package com.neohorizon.api.service.metrica;
 
 import com.neohorizon.api.dto.DevHoursMetricsDTO;
 import com.neohorizon.api.entity.FatoApontamentoHoras;

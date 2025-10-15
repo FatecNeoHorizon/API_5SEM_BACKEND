@@ -1,4 +1,4 @@
-package com.neohorizon.api.service;
+package com.neohorizon.api.service.fato;
 
 import com.neohorizon.api.constants.MessageConstants;
 import com.neohorizon.api.dto.FatoApontamentoHorasDTO;

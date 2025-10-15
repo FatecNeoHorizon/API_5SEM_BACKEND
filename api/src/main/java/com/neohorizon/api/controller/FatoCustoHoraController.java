@@ -24,7 +24,7 @@ import com.neohorizon.api.dto.FatoCustoHoraDTO;
 import com.neohorizon.api.entity.DimDev;
 import com.neohorizon.api.entity.DimPeriodo;
 import com.neohorizon.api.entity.DimProjeto;
-import com.neohorizon.api.service.FatoCustoHoraService;
+import com.neohorizon.api.service.fato.FatoCustoHoraService;
 
 @RestController
 @RequestMapping("/fato-custo-hora")
