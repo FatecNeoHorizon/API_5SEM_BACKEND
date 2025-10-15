@@ -1,19 +1,24 @@
 package com.neohorizon.api.service.metrica;
 
-import com.neohorizon.api.dto.DevHoursMetricsDTO;
-import com.neohorizon.api.entity.FatoApontamentoHoras;
-import com.neohorizon.api.entity.DimDev;
-import com.neohorizon.api.entity.DimAtividade;
-import com.neohorizon.api.exception.BusinessException;
-import com.neohorizon.api.repository.FatoApontamentoHorasRepository;
-import com.neohorizon.api.utils.ValidationUtils;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.neohorizon.api.dto.metrica.DevHoursMetricsDTO;
+import com.neohorizon.api.entity.dimensao.DimAtividade;
+import com.neohorizon.api.entity.dimensao.DimDev;
+import com.neohorizon.api.entity.fato.FatoApontamentoHoras;
+import com.neohorizon.api.exception.BusinessException;
+import com.neohorizon.api.repository.fato.FatoApontamentoHorasRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 @Service
 public class DevHoursMetricsService {
@@ -43,98 +48,96 @@ public class DevHoursMetricsService {
         
         List<FatoApontamentoHoras> apontamentos = getApontamentosByFilters(devId, activityId, fromDate, toDate);
         
-        // Agrupar por desenvolvedor
-        Map<Long, List<FatoApontamentoHoras>> apontamentosPorDev = apontamentos.stream()
-                .collect(Collectors.groupingBy(a -> a.getDimDev().getId()));
+        // OTIMIZAÇÃO: Usar parallelStream() para grandes volumes + collector customizado
+        return apontamentos.parallelStream()
+                .collect(Collectors.groupingBy(
+                    a -> a.getDimDev().getId(),
+                    Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        this::processDevApontamentos
+                    )
+                ))
+                .values()
+                .stream()
+                .filter(dto -> dto != null) // Filtrar nulls
+                .sorted(Comparator.comparing(DevHoursMetricsDTO::getDevNome))
+                .toList();
+    }
 
-        List<DevHoursMetricsDTO> metrics = new ArrayList<>();
-
-        for (Map.Entry<Long, List<FatoApontamentoHoras>> entry : apontamentosPorDev.entrySet()) {
-            List<FatoApontamentoHoras> devApontamentos = entry.getValue();
-            
-            DimDev dev = devApontamentos.get(0).getDimDev();
-            
-            // Calcular total de horas do desenvolvedor
-            Double totalHoras = devApontamentos.stream()
-                    .mapToDouble(FatoApontamentoHoras::getHorasTrabalhadas)
-                    .sum();
-
-            // Agrupar por atividade
-            Map<Long, List<FatoApontamentoHoras>> apontamentosPorAtividade = devApontamentos.stream()
-                    .collect(Collectors.groupingBy(a -> a.getDimAtividade().getId()));
-
-            List<DevHoursMetricsDTO.AtividadeHorasDTO> atividades = new ArrayList<>();
-
-            for (Map.Entry<Long, List<FatoApontamentoHoras>> atividadeEntry : apontamentosPorAtividade.entrySet()) {
-                List<FatoApontamentoHoras> atividadeApontamentos = atividadeEntry.getValue();
-                DimAtividade atividade = atividadeApontamentos.get(0).getDimAtividade();
-                
-                // Calcular total de horas da atividade
-                Double totalHorasAtividade = atividadeApontamentos.stream()
-                        .mapToDouble(FatoApontamentoHoras::getHorasTrabalhadas)
-                        .sum();
-
-                // Agrupar por dia
-                List<DevHoursMetricsDTO.DiaHorasDTO> diasApontamentos = atividadeApontamentos.stream()
-                        .map(a -> DevHoursMetricsDTO.DiaHorasDTO.builder()
-                                .data(a.getDataApontamento())
-                                .horas(a.getHorasTrabalhadas())
-                                .descricaoTrabalho(a.getDescricaoTrabalho())
-                                .build())
-                        .sorted(Comparator.comparing(DevHoursMetricsDTO.DiaHorasDTO::getData).reversed())
-                        .toList();
-
-                DevHoursMetricsDTO.AtividadeHorasDTO atividadeDTO = DevHoursMetricsDTO.AtividadeHorasDTO.builder()
-                        .atividadeId(atividade.getId())
-                        .atividadeNome(atividade.getNome())
-                        .projetoNome(atividade.getDimProjeto().getNome())
-                        .totalHoras(totalHorasAtividade)
-                        .diasApontamentos(diasApontamentos)
-                        .build();
-
-                atividades.add(atividadeDTO);
-            }
-
-            // Ordenar atividades por total de horas decrescente
-            atividades.sort(Comparator.comparing(DevHoursMetricsDTO.AtividadeHorasDTO::getTotalHoras).reversed());
-
-            DevHoursMetricsDTO devMetrics = DevHoursMetricsDTO.builder()
-                    .devId(dev.getId())
-                    .devNome(dev.getNome())
-                    .devEmail(dev.getEmail())
-                    .totalHoras(totalHoras)
-                    .atividades(atividades)
-                    .build();
-
-            metrics.add(devMetrics);
+    private DevHoursMetricsDTO processDevApontamentos(List<FatoApontamentoHoras> devApontamentos) {
+        if (devApontamentos.isEmpty()) {
+            return null;
         }
-
-        // Ordenar por total de horas decrescente
-        metrics.sort(Comparator.comparing(DevHoursMetricsDTO::getTotalHoras).reversed());
-
-        return metrics;
+    
+        DimDev dev = devApontamentos.get(0).getDimDev();
+    
+        Map<Long, List<DevHoursMetricsDTO.DiaHorasDTO>> atividadeMap = new HashMap<>();
+        Map<Long, Double> horasPorAtividade = new HashMap<>();
+        Map<Long, DimAtividade> atividadeCache = new HashMap<>();
+        double totalHorasGeral = 0.0;
+    
+        for (FatoApontamentoHoras apontamento : devApontamentos) {
+            Long atividadeId = apontamento.getDimAtividade().getId();
+            double horas = apontamento.getHorasTrabalhadas();
+    
+            totalHorasGeral += horas;
+            horasPorAtividade.merge(atividadeId, horas, Double::sum);
+            atividadeCache.putIfAbsent(atividadeId, apontamento.getDimAtividade());
+    
+            DevHoursMetricsDTO.DiaHorasDTO diaDTO = DevHoursMetricsDTO.DiaHorasDTO.builder()
+                .data(apontamento.getDataAtualizacao().toLocalDate())
+                .horas(horas)
+                .descricaoTrabalho(apontamento.getDescricaoTrabalho())
+                .build();
+    
+            atividadeMap.computeIfAbsent(atividadeId, k -> new ArrayList<>()).add(diaDTO);
+        }
+    
+        List<DevHoursMetricsDTO.AtividadeHorasDTO> atividades = atividadeMap.entrySet().stream()
+            .map(entry -> {
+                Long atividadeId = entry.getKey();
+                List<DevHoursMetricsDTO.DiaHorasDTO> dias = entry.getValue();
+                DimAtividade atividade = atividadeCache.get(atividadeId);
+    
+                String atividadeNome = atividade != null ? atividade.getNome() : "Atividade desconhecida";
+                Double totalHoras = horasPorAtividade.get(atividadeId);
+                if (totalHoras == null) {
+                    totalHoras = 0.0;
+                }
+    
+                return DevHoursMetricsDTO.AtividadeHorasDTO.builder()
+                    .atividadeId(atividadeId)
+                    .atividadeNome(atividadeNome)
+                    .totalHoras(totalHoras)
+                    .diasApontamentos(dias)
+                    .build();
+            })
+            .sorted(Comparator.comparing(DevHoursMetricsDTO.AtividadeHorasDTO::getAtividadeNome))
+            .toList();
+    
+        return DevHoursMetricsDTO.builder()
+            .devId(dev.getId())
+            .devNome(dev.getNome())
+            .totalHoras(totalHorasGeral)
+            .atividades(atividades)
+            .build();
     }
 
     private List<FatoApontamentoHoras> getApontamentosByFilters(Long devId, Long activityId, 
                                                               LocalDate fromDate, LocalDate toDate) {
-        // Se não especificou datas, usar últimos 30 dias
-        LocalDate effectiveFromDate = fromDate != null ? fromDate : LocalDate.now().minusDays(30);
-        LocalDate effectiveToDate = toDate != null ? toDate : LocalDate.now();
+        // Converter LocalDate para LocalDateTime (início do dia e fim do dia)
+        LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : LocalDate.now().minusDays(30).atStartOfDay();
+        LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
 
-        // Aplicar filtros baseado nos parâmetros
         try {
             if (devId != null && activityId != null) {
-                return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(
-                    devId, activityId, effectiveFromDate, effectiveToDate);
+                return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(devId, activityId, fromDateTime, toDateTime);
             } else if (devId != null) {
-                return fatoApontamentoHorasRepository.findByDevAndPeriodo(
-                    devId, effectiveFromDate, effectiveToDate);
+                return fatoApontamentoHorasRepository.findByDevAndPeriodo(devId, fromDateTime, toDateTime);
             } else if (activityId != null) {
-                return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(
-                    activityId, effectiveFromDate, effectiveToDate);
+                return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(activityId, fromDateTime, toDateTime);
             } else {
-                return fatoApontamentoHorasRepository.findByPeriodo(
-                    effectiveFromDate, effectiveToDate);
+                return fatoApontamentoHorasRepository.findByPeriodo(fromDateTime, toDateTime);
             }
         } catch (Exception e) {
             throw new BusinessException("Erro ao buscar apontamentos: " + e.getMessage(), e);

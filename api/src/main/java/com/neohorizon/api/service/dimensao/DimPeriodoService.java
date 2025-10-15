@@ -1,115 +1,66 @@
 package com.neohorizon.api.service.dimensao;
 
-import com.neohorizon.api.dto.DimPeriodoDTO;
-import com.neohorizon.api.entity.DimPeriodo;
-import com.neohorizon.api.exception.EntityNotFoundException;
-import com.neohorizon.api.exception.BusinessException;
-import com.neohorizon.api.repository.DimPeriodoRepository;
-import com.neohorizon.api.utils.ValidationUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
+import com.neohorizon.api.entity.dimensao.DimPeriodo;
+import com.neohorizon.api.repository.dimensao.DimPeriodoRepository;
 
 @Service
 public class DimPeriodoService {
 
-    private static final String ENTITY_NAME = "DimPeriodo";
     private final DimPeriodoRepository dimPeriodoRepository;
+    private final com.neohorizon.api.mapper.DimensionMapper dimensionMapper;
 
-    @Autowired
-    public DimPeriodoService(DimPeriodoRepository dimPeriodoRepository) {
+    public DimPeriodoService(DimPeriodoRepository dimPeriodoRepository, 
+                            com.neohorizon.api.mapper.DimensionMapper dimensionMapper) {
         this.dimPeriodoRepository = dimPeriodoRepository;
+        this.dimensionMapper = dimensionMapper;
     }
 
     public List<DimPeriodoDTO> getAllEntities() {
-        return dimPeriodoRepository.findAll()
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+        List<DimPeriodo> entities = dimPeriodoRepository.findAll();
+        return dimensionMapper.periodoListToDTO(entities);
     }
 
     public DimPeriodoDTO findById(Long id) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        
         return dimPeriodoRepository.findById(id)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+                .map(dimensionMapper::periodoToDTO)
+                .orElse(null);
     }
 
     public DimPeriodoDTO save(DimPeriodoDTO dimPeriodoDTO) {
-        ValidationUtils.requireNonNull(dimPeriodoDTO, ENTITY_NAME + " é obrigatório");
-        validateDimPeriodoDTO(dimPeriodoDTO);
-        
-        DimPeriodo dimPeriodo = convertToEntity(dimPeriodoDTO);
+        DimPeriodo dimPeriodo = dimensionMapper.dtoToPeriodo(dimPeriodoDTO);
         DimPeriodo savedEntity = dimPeriodoRepository.save(dimPeriodo);
-        return convertToDTO(savedEntity);
+        return dimensionMapper.periodoToDTO(savedEntity);
     }
 
     public DimPeriodoDTO update(Long id, DimPeriodoDTO dimPeriodoDTO) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        ValidationUtils.requireNonNull(dimPeriodoDTO, ENTITY_NAME + " é obrigatório para atualização");
-        validateDimPeriodoDTO(dimPeriodoDTO);
-        
         DimPeriodo existingEntity = dimPeriodoRepository.findById(id)
-                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
-
+            .orElseThrow(() -> new IllegalArgumentException("DimPeriodo com ID " + id + " não encontrado."));
+    
         existingEntity.setDia(dimPeriodoDTO.getDia());
         existingEntity.setSemana(dimPeriodoDTO.getSemana());
         existingEntity.setMes(dimPeriodoDTO.getMes());
         existingEntity.setAno(dimPeriodoDTO.getAno());
-
+    
         DimPeriodo updatedEntity = dimPeriodoRepository.save(existingEntity);
-        return convertToDTO(updatedEntity);
+        return dimensionMapper.periodoToDTO(updatedEntity);
     }
-
+    
     public void deleteById(Long id) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        
-        if (!dimPeriodoRepository.existsById(id)) {
-            throw EntityNotFoundException.forId(ENTITY_NAME, id);
-        }
-        
-        try {
-            dimPeriodoRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
-        }
+        dimPeriodoRepository.deleteById(id);
     }
 
-    private void validateDimPeriodoDTO(DimPeriodoDTO dto) {
-        ValidationUtils.require(dto.getAno() != null && dto.getAno() > 0, "Ano é obrigatório e deve ser positivo");
-        ValidationUtils.require(dto.getMes() != null && dto.getMes() >= 1 && dto.getMes() <= 12, 
-            "Mês deve estar entre 1 e 12");
-        ValidationUtils.require(dto.getDia() != null && dto.getDia() >= 1 && dto.getDia() <= 31, 
-            "Dia deve estar entre 1 e 31");
-    }
+      public List<DimPeriodoDTO> getAllEntitiesByFilter(Integer dia, Integer semana, Integer mes, Integer ano)
+    {
+        return dimPeriodoRepository.findByDiaAndSemanaAndMesAndAno(dia, semana, mes, ano)
+                .parallelStream()
+                .map(dimensionMapper::periodoToDTO)
+                .collect(Collectors.toList());
 
-    private DimPeriodoDTO convertToDTO(DimPeriodo entity) {
-        if (entity == null) {
-            return null;
-        }
-        DimPeriodoDTO dto = new DimPeriodoDTO();
-        dto.setId(entity.getId());
-        dto.setDia(entity.getDia());
-        dto.setSemana(entity.getSemana());
-        dto.setMes(entity.getMes());
-        dto.setAno(entity.getAno());
-        return dto;
-    }
-
-    private DimPeriodo convertToEntity(DimPeriodoDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        DimPeriodo entity = new DimPeriodo();
-        entity.setId(dto.getId());
-
-        entity.setDia(dto.getDia());
-        entity.setSemana(dto.getSemana());
-        entity.setMes(dto.getMes());
-        entity.setAno(dto.getAno());
-        return entity;
     }
 }

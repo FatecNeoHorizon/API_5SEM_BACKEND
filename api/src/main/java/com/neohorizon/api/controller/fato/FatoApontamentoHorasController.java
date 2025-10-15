@@ -1,20 +1,28 @@
 package com.neohorizon.api.controller.fato;
 
-import com.neohorizon.api.dto.FatoApontamentoHorasDTO;
-import com.neohorizon.api.service.fato.FatoApontamentoHorasService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.neohorizon.api.controller.comum.BaseController;
+import com.neohorizon.api.dto.response.fato.FatoApontamentoHorasDTO;
+import com.neohorizon.api.service.fato.FatoApontamentoHorasService;
+
 @RestController
 @RequestMapping("/fato-apontamento-horas")
-public class FatoApontamentoHorasController {
+public class FatoApontamentoHorasController extends BaseController {
 
     private final FatoApontamentoHorasService fatoApontamentoHorasService;
 
@@ -26,16 +34,16 @@ public class FatoApontamentoHorasController {
     @GetMapping
     public ResponseEntity<List<FatoApontamentoHorasDTO>> getAllEntities() {
         List<FatoApontamentoHorasDTO> fatoApontamentoHorasDTOs = fatoApontamentoHorasService.getAllEntities();
-        return ResponseEntity.ok(fatoApontamentoHorasDTOs);
+        return ok(fatoApontamentoHorasDTOs);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FatoApontamentoHorasDTO> getFatoApontamentoHorasById(@PathVariable Long id) {
         FatoApontamentoHorasDTO fatoApontamentoHorasDTO = fatoApontamentoHorasService.findById(id);
         if (fatoApontamentoHorasDTO == null) {
-            return ResponseEntity.notFound().build();
+            return notFound();
         }
-        return ResponseEntity.ok(fatoApontamentoHorasDTO);
+        return ok(fatoApontamentoHorasDTO);
     }
 
     @GetMapping("/periodo")
@@ -44,27 +52,27 @@ public class FatoApontamentoHorasController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
         
         List<FatoApontamentoHorasDTO> apontamentos = fatoApontamentoHorasService.findByPeriodo(dataInicio, dataFim);
-        return ResponseEntity.ok(apontamentos);
+        return ok(apontamentos);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<FatoApontamentoHorasDTO> addFatoApontamentoHoras(@RequestBody FatoApontamentoHorasDTO fatoApontamentoHorasDTO) {
         FatoApontamentoHorasDTO createdEntity = fatoApontamentoHorasService.create(fatoApontamentoHorasDTO);
-        return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
+        return created(createdEntity);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FatoApontamentoHorasDTO> updateFatoApontamentoHoras(@PathVariable Long id, @RequestBody FatoApontamentoHorasDTO fatoApontamentoHorasDTO) {
         FatoApontamentoHorasDTO updatedEntity = fatoApontamentoHorasService.update(id, fatoApontamentoHorasDTO);
         if (updatedEntity == null) {
-            return ResponseEntity.notFound().build();
+            return notFound();
         }
-        return ResponseEntity.ok(updatedEntity);
+        return ok(updatedEntity);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFatoApontamentoHoras(@PathVariable Long id) {
         fatoApontamentoHorasService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return noContent();
     }
 }

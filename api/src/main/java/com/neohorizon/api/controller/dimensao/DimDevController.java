@@ -1,60 +1,68 @@
 package com.neohorizon.api.controller.dimensao;
 
-import com.neohorizon.api.dto.DimDevDTO;
-import com.neohorizon.api.service.dimensao.DimDevService;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.neohorizon.api.controller.comum.BaseController;
+import com.neohorizon.api.dto.response.dimensao.DimDevDTO;
+import com.neohorizon.api.service.dimensao.DimDevService;
 
 @RestController
 @RequestMapping("/dim-dev")
-public class DimDevController {
+public class DimDevController extends BaseController {
 
     private final DimDevService dimDevService;
 
-    @Autowired
     public DimDevController(DimDevService dimDevService) {
         this.dimDevService = dimDevService;
     }
 
     @GetMapping
-    public ResponseEntity<List<DimDevDTO>> getAllEntities(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description) {
-
-        List<DimDevDTO> dimDevDTOs = dimDevService.getAllEntities();
-        return ResponseEntity.ok(dimDevDTOs);
+    public ResponseEntity<List<DimDevDTO>> getAllEntities() {
+        List<DimDevDTO> devs = dimDevService.getAllEntities();
+        return ok(devs);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DimDevDTO> getDimDevById(@PathVariable Long id) {
-        DimDevDTO dimDevDTO = dimDevService.findById(id);
-        if (dimDevDTO == null) {
-            return ResponseEntity.notFound().build();
+    public ResponseEntity<DimDevDTO> getEntityById(@PathVariable Long id) {
+        DimDevDTO dev = dimDevService.getById(id);
+        if (dev == null) {
+            return notFound();
         }
-        return ResponseEntity.ok(dimDevDTO);
+        return ok(dev);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<DimDevDTO> addDimDev(@RequestBody DimDevDTO dimDevDTO) {
-        DimDevDTO createdEntity = dimDevService.save(dimDevDTO);
-        return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
+    @PostMapping
+    public ResponseEntity<DimDevDTO> createEntity(@RequestBody DimDevDTO dimDevDTO) {
+        DimDevDTO createdDev = dimDevService.create(dimDevDTO);
+        return created(createdDev);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DimDevDTO> updateDimDev(@PathVariable Long id, @RequestBody DimDevDTO dimDevDTO) {
-        DimDevDTO updatedEntity = dimDevService.update(id, dimDevDTO);
-        return ResponseEntity.ok(updatedEntity);
+    public ResponseEntity<DimDevDTO> updateEntity(@PathVariable Long id, @RequestBody DimDevDTO dimDevDTO) {
+        DimDevDTO updatedDev = dimDevService.update(id, dimDevDTO);
+        if (updatedDev == null) {
+            return notFound();
+        }
+        return ok(updatedDev);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteDimDev(@PathVariable Long id) {
-        dimDevService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteEntity(@PathVariable Long id) {
+        boolean deleted = dimDevService.delete(id);
+        if (!deleted) {
+            return notFound();
+        }
+        return noContent();
     }
 
 }

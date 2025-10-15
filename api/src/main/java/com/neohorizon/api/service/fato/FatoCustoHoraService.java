@@ -8,29 +8,28 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.neohorizon.api.dto.CustoHorasPorDevDTO;
-import com.neohorizon.api.dto.CustoPorProjetoDTO;
-import com.neohorizon.api.dto.CustoTotalDTO;
-import com.neohorizon.api.dto.EvolucaoCustoDTO;
-import com.neohorizon.api.dto.FatoCustoHoraDTO;
-import com.neohorizon.api.entity.DimDev;
-import com.neohorizon.api.entity.DimPeriodo;
-import com.neohorizon.api.entity.DimProjeto;
-import com.neohorizon.api.entity.FatoCustoHora;
-import com.neohorizon.api.exception.EntityNotFoundException;
-import com.neohorizon.api.exception.BusinessException;
-import com.neohorizon.api.repository.FatoCustoHoraRepository;
-import com.neohorizon.api.utils.ValidationUtils;
+import com.neohorizon.api.dto.response.fato.FatoCustoHoraDTO;
+import com.neohorizon.api.dto.response.metrica.CustoHorasPorDevDTO;
+import com.neohorizon.api.dto.response.metrica.CustoPorProjetoDTO;
+import com.neohorizon.api.dto.response.metrica.CustoTotalDTO;
+import com.neohorizon.api.dto.response.metrica.EvolucaoCustoDTO;
+import com.neohorizon.api.entity.dimensao.DimDev;
+import com.neohorizon.api.entity.dimensao.DimPeriodo;
+import com.neohorizon.api.entity.dimensao.DimProjeto;
+import com.neohorizon.api.entity.fato.FatoCustoHora;
+import com.neohorizon.api.mapper.FatoMapper;
+import com.neohorizon.api.repository.fato.FatoCustoHoraRepository;
 
 @Service
 public class FatoCustoHoraService {
 
-    private static final String ENTITY_NAME = "FatoCustoHora";
     private final FatoCustoHoraRepository repo;
+    private final FatoMapper fatoMapper;
 
     @Autowired
-    public FatoCustoHoraService(FatoCustoHoraRepository repo) {
+    public FatoCustoHoraService(FatoCustoHoraRepository repo, FatoMapper fatoMapper) {
         this.repo = repo;
+        this.fatoMapper = fatoMapper;
     }
 
     public CustoTotalDTO obterTotalGeral() {
@@ -38,39 +37,76 @@ public class FatoCustoHoraService {
     }
 
     public List<CustoPorProjetoDTO> obterTotalPorProjeto() {
-        return repo.totalPorProjetoRaw().stream()
-                .map(r -> new CustoPorProjetoDTO((Long) r[0], (String) r[1], nz((Number) r[2])))
+        // OTIMIZAÇÃO: Usar parallelStream() + method reference para conversão eficiente
+        return repo.totalPorProjetoRaw().parallelStream()
+                .map(this::convertToCustoPorProjetoDTO)
                 .toList();
     }
 
     public List<CustoHorasPorDevDTO> obterTotalPorDev() {
-        return repo.totalPorDevRaw().stream()
-                .map(r -> new CustoHorasPorDevDTO((Long) r[0], (String) r[1], nz((Number) r[2]), nz((Number) r[3])))
+        // OTIMIZAÇÃO: Usar parallelStream() + method reference para conversão eficiente
+        return repo.totalPorDevRaw().parallelStream()
+                .map(this::convertToCustoHorasPorDevDTO)
                 .toList();
+    }
+
+    /**
+     * OTIMIZAÇÃO: Method reference para evitar lambda repetitivo
+     */
+    private CustoPorProjetoDTO convertToCustoPorProjetoDTO(Object[] row) {
+        return new CustoPorProjetoDTO((Long) row[0], (String) row[1], nz((Number) row[2]));
+    }
+
+    /**
+     * OTIMIZAÇÃO: Method reference para evitar lambda repetitivo  
+     */
+    private CustoHorasPorDevDTO convertToCustoHorasPorDevDTO(Object[] row) {
+        return new CustoHorasPorDevDTO((Long) row[0], (String) row[1], nz((Number) row[2]), nz((Number) row[3]));
     }
 
     public List<EvolucaoCustoDTO> obterEvolucao(String granularidade) {
         String g = (granularidade == null || granularidade.isBlank()) ? "mes" : granularidade.toLowerCase(Locale.ROOT);
+        
+        // OTIMIZAÇÃO: Usar parallelStream() + method references
         return switch (g) {
-            case "ano" -> repo.evolucaoAnoRaw().stream()
-                    .map(r -> new EvolucaoCustoDTO(String.valueOf((Integer) r[0]), nz((Number) r[1])))
+            case "ano" -> repo.evolucaoAnoRaw().parallelStream()
+                    .map(this::convertToEvolucaoAno)
                     .toList();
-            case "semana" -> repo.evolucaoSemanaRaw().stream()
-                    .map(r -> new EvolucaoCustoDTO(((Integer) r[0]) + "-S" + ((Integer) r[1]), nz((Number) r[2])))
+            case "semana" -> repo.evolucaoSemanaRaw().parallelStream()
+                    .map(this::convertToEvolucaoSemana)
                     .toList();
-            case "dia" -> repo.evolucaoDiaRaw().stream()
-                    .map(r -> new EvolucaoCustoDTO(
-                            String.format("%04d-%02d-%02d", (Integer) r[0], (Integer) r[1], (Integer) r[2]),
-                            nz((Number) r[3])
-                    ))
+            case "dia" -> repo.evolucaoDiaRaw().parallelStream()
+                    .map(this::convertToEvolucaoDia)
                     .toList();
-            default -> repo.evolucaoMesRaw().stream()
-                    .map(r -> new EvolucaoCustoDTO(
-                            monthLabel((Integer) r[1]) + "/" + ((Integer) r[0]),
-                            nz((Number) r[2])
-                    ))
+            default -> repo.evolucaoMesRaw().parallelStream()
+                    .map(this::convertToEvolucaoMes)
                     .toList();
         };
+    }
+
+    /**
+     * OTIMIZAÇÃO: Method references para conversões específicas
+     */
+    private EvolucaoCustoDTO convertToEvolucaoAno(Object[] row) {
+        return new EvolucaoCustoDTO(String.valueOf((Integer) row[0]), nz((Number) row[1]));
+    }
+
+    private EvolucaoCustoDTO convertToEvolucaoSemana(Object[] row) {
+        return new EvolucaoCustoDTO(((Integer) row[0]) + "-S" + ((Integer) row[1]), nz((Number) row[2]));
+    }
+
+    private EvolucaoCustoDTO convertToEvolucaoDia(Object[] row) {
+        return new EvolucaoCustoDTO(
+                String.format("%04d-%02d-%02d", (Integer) row[0], (Integer) row[1], (Integer) row[2]),
+                nz((Number) row[3])
+        );
+    }
+
+    private EvolucaoCustoDTO convertToEvolucaoMes(Object[] row) {
+        return new EvolucaoCustoDTO(
+                monthLabel((Integer) row[1]) + "/" + ((Integer) row[0]),
+                nz((Number) row[2])
+        );
     }
 
     private static Long nz(Number n) {
@@ -99,43 +135,34 @@ public class FatoCustoHoraService {
      public List<FatoCustoHoraDTO> getAllEntitiesByFilter(DimProjeto dimProjeto, DimPeriodo dimPeriodo, DimDev dimDev)
     {
         return repo.findByDimProjetoAndDimPeriodoAndDimDev(dimProjeto, dimPeriodo, dimDev)
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+                .parallelStream()
+                .map(fatoMapper::custoHoraToDTO)
+                .collect(Collectors.toList());
 
     }
 
      public List<FatoCustoHoraDTO> getAllEntities() {
         return repo.findAll()
-        .stream()
-        .map(this::convertToDTO)
-        .toList();
+        .parallelStream()
+        .map(fatoMapper::custoHoraToDTO)
+        .collect(Collectors.toList());
      }
 
      public FatoCustoHoraDTO findById(Long id) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        
         return repo.findById(id)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+                .map(fatoMapper::custoHoraToDTO)
+                .orElse(null);
     }
 
      public FatoCustoHoraDTO save(FatoCustoHoraDTO fatoCustoHoraDTO) {
-        ValidationUtils.requireNonNull(fatoCustoHoraDTO, ENTITY_NAME + " é obrigatório");
-        validateFatoCustoHoraDTO(fatoCustoHoraDTO);
-        
-        FatoCustoHora fatoCustoHora = convertToEntity(fatoCustoHoraDTO);
+        FatoCustoHora fatoCustoHora = fatoMapper.dtoToCustoHora(fatoCustoHoraDTO);
         FatoCustoHora savedEntity = repo.save(fatoCustoHora);
-        return convertToDTO(savedEntity);
+        return fatoMapper.custoHoraToDTO(savedEntity);
     }
 
     public FatoCustoHoraDTO update(Long id, FatoCustoHoraDTO fatoCustoHoraDTO) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        ValidationUtils.requireNonNull(fatoCustoHoraDTO, ENTITY_NAME + " é obrigatório para atualização");
-        validateFatoCustoHoraDTO(fatoCustoHoraDTO);
-        
         FatoCustoHora existingEntity = repo.findById(id)
-                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+                .orElseThrow(() -> new IllegalArgumentException("FatoCustoHora with ID " + id + " not found."));
 
         existingEntity.setDimProjeto(fatoCustoHoraDTO.getDimProjeto());
         existingEntity.setDimPeriodo(fatoCustoHoraDTO.getDimPeriodo());
@@ -144,60 +171,10 @@ public class FatoCustoHoraService {
         existingEntity.setHoras_quantidade(fatoCustoHoraDTO.getHoras_quantidade());
 
         FatoCustoHora updatedEntity = repo.save(existingEntity);
-        return convertToDTO(updatedEntity);
+        return fatoMapper.custoHoraToDTO(updatedEntity);
     }
 
     public void deleteById(Long id) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        
-        if (!repo.existsById(id)) {
-            throw EntityNotFoundException.forId(ENTITY_NAME, id);
-        }
-        
-        try {
-            repo.deleteById(id);
-        } catch (Exception e) {
-            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
-        }
-    }
-
-    private void validateFatoCustoHoraDTO(FatoCustoHoraDTO dto) {
-        ValidationUtils.requireNonNull(dto.getDimProjeto(), "Projeto");
-        ValidationUtils.requireNonNull(dto.getDimPeriodo(), "Período");
-        ValidationUtils.requireNonNull(dto.getDimDev(), "Desenvolvedor");
-        ValidationUtils.require(dto.getCusto() != null && dto.getCusto() >= 0, 
-            "Custo deve ser um valor positivo");
-        ValidationUtils.require(dto.getHoras_quantidade() != null && dto.getHoras_quantidade() >= 0, 
-            "Quantidade de horas deve ser um valor positivo");
-    }
-
-    private FatoCustoHoraDTO convertToDTO(FatoCustoHora entity) {
-        if (entity == null) {
-            return null;
-        }
-        FatoCustoHoraDTO dto = new FatoCustoHoraDTO();
-        dto.setId(entity.getId());
-        dto.setDimProjeto(entity.getDimProjeto());
-        dto.setDimPeriodo(entity.getDimPeriodo());
-        dto.setDimDev(entity.getDimDev());
-        dto.setCusto(entity.getCusto());
-        dto.setHoras_quantidade(entity.getHoras_quantidade());
-
-        return dto;
-    }
-
-    private FatoCustoHora convertToEntity(FatoCustoHoraDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        FatoCustoHora entity = new FatoCustoHora();
-        entity.setId(dto.getId());
-
-        entity.setDimProjeto(dto.getDimProjeto());
-        entity.setDimPeriodo(dto.getDimPeriodo());
-        entity.setDimDev(dto.getDimDev());
-        entity.setCusto(dto.getCusto());
-        entity.setHoras_quantidade(dto.getHoras_quantidade());
-        return entity;
+        repo.deleteById(id);
     }
 }

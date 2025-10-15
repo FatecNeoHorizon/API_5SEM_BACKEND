@@ -4,7 +4,6 @@ package com.neohorizon.api.controller.fato;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,19 +15,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.neohorizon.api.dto.CustoHorasPorDevDTO;
-import com.neohorizon.api.dto.CustoPorProjetoDTO;
-import com.neohorizon.api.dto.CustoTotalDTO;
-import com.neohorizon.api.dto.EvolucaoCustoDTO;
-import com.neohorizon.api.dto.FatoCustoHoraDTO;
-import com.neohorizon.api.entity.DimDev;
-import com.neohorizon.api.entity.DimPeriodo;
-import com.neohorizon.api.entity.DimProjeto;
+import com.neohorizon.api.controller.comum.BaseController;
+import com.neohorizon.api.dto.response.fato.FatoCustoHoraDTO;
+import com.neohorizon.api.dto.response.metrica.CustoHorasPorDevDTO;
+import com.neohorizon.api.dto.response.metrica.CustoPorProjetoDTO;
+import com.neohorizon.api.dto.response.metrica.CustoTotalDTO;
+import com.neohorizon.api.dto.response.metrica.EvolucaoCustoDTO;
+import com.neohorizon.api.entity.dimensao.DimDev;
+import com.neohorizon.api.entity.dimensao.DimPeriodo;
+import com.neohorizon.api.entity.dimensao.DimProjeto;
 import com.neohorizon.api.service.fato.FatoCustoHoraService;
 
 @RestController
 @RequestMapping("/fato-custo-hora")
-public class FatoCustoHoraController {
+public class FatoCustoHoraController extends BaseController {
 
     private final FatoCustoHoraService service;
 
@@ -39,23 +39,23 @@ public class FatoCustoHoraController {
 
     @GetMapping("/total")
     public ResponseEntity<CustoTotalDTO> getTotalGeral() {
-        return ResponseEntity.ok(service.obterTotalGeral());
+        return ok(service.obterTotalGeral());
     }
 
     @GetMapping("/total-por-projeto")
     public ResponseEntity<List<CustoPorProjetoDTO>> getTotalPorProjeto() {
-        return ResponseEntity.ok(service.obterTotalPorProjeto());
+        return ok(service.obterTotalPorProjeto());
     }
 
     @GetMapping("/por-dev")
     public ResponseEntity<List<CustoHorasPorDevDTO>> getTotalPorDev() {
-        return ResponseEntity.ok(service.obterTotalPorDev());
+        return ok(service.obterTotalPorDev());
     }
 
     @GetMapping("/evolucao")
     public ResponseEntity<List<EvolucaoCustoDTO>> getEvolucao(
             @RequestParam(defaultValue = "mes") String granularidade) {
-        return ResponseEntity.ok(service.obterEvolucao(granularidade));
+        return ok(service.obterEvolucao(granularidade));
     }
 
     @GetMapping("/filter")
@@ -85,43 +85,40 @@ public class FatoCustoHoraController {
         }
 
         List<FatoCustoHoraDTO> fatoCustoHoraDTOs = service.getAllEntitiesByFilter(dimProjeto, dimPeriodo, dimDev);
-        return ResponseEntity.ok(fatoCustoHoraDTOs);
+        return ok(fatoCustoHoraDTOs);
     }
 
     @GetMapping
-    public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntities(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description) {
-
+    public ResponseEntity<List<FatoCustoHoraDTO>> getAllEntities() {
         List<FatoCustoHoraDTO> fatoCustoHoraDTOs = service.getAllEntities();
-        return ResponseEntity.ok(fatoCustoHoraDTOs);
+        return ok(fatoCustoHoraDTOs);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<FatoCustoHoraDTO> getFatoCustoHoraById(@PathVariable Long id) {
         FatoCustoHoraDTO fatoCustoHoraDTO = service.findById(id);
         if (fatoCustoHoraDTO == null) {
-            return ResponseEntity.notFound().build();
+            return notFound();
         }
-        return ResponseEntity.ok(fatoCustoHoraDTO);
+        return ok(fatoCustoHoraDTO);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<FatoCustoHoraDTO> addFatoCustoHora(@RequestBody FatoCustoHoraDTO fatoCustoHoraDTO) {
         FatoCustoHoraDTO createdEntity = service.save(fatoCustoHoraDTO);
-        return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
+        return created(createdEntity);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FatoCustoHoraDTO> updateFatoCustoHora(@PathVariable Long id,
             @RequestBody FatoCustoHoraDTO fatoCustoHoraDTO) {
         FatoCustoHoraDTO updatedEntity = service.update(id, fatoCustoHoraDTO);
-        return ResponseEntity.ok(updatedEntity);
+        return ok(updatedEntity);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFatoCustoHora(@PathVariable Long id) {
         service.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return noContent();
     }
 }

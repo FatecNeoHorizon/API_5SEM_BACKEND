@@ -1,19 +1,23 @@
 package com.neohorizon.api.controller.metrica;
 
-import com.neohorizon.api.dto.DevHoursMetricsDTO;
-import com.neohorizon.api.service.metrica.DevHoursMetricsService;
+import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.neohorizon.api.controller.comum.BaseController;
+import com.neohorizon.api.dto.metrica.DevHoursMetricsDTO;
+import com.neohorizon.api.service.metrica.DevHoursMetricsService;
 
 @RestController
 @RequestMapping("/metrics")
-public class MetricsController {
+public class MetricsController extends BaseController {
 
     private final DevHoursMetricsService devHoursMetricsService;
 
@@ -39,6 +43,7 @@ public class MetricsController {
             @RequestParam(name = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
         List<DevHoursMetricsDTO> metrics = devHoursMetricsService.getDevHoursMetrics(devId, activityId, fromDate, toDate);
-        return ResponseEntity.ok(metrics);
+        return ok(metrics);
     }
+
 }

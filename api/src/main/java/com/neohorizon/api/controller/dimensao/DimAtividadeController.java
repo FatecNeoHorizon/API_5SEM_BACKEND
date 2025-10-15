@@ -10,9 +10,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.neohorizon.api.controller.comum.BaseController;
+import com.neohorizon.api.dto.response.dimensao.DimAtividadeDTO;
+import com.neohorizon.api.service.dimensao.DimAtividadeService;
+
 @RestController
 @RequestMapping("/dim-atividade")
-public class DimAtividadeController {
+public class DimAtividadeController extends BaseController {
 
     private final DimAtividadeService dimAtividadeService;
 
@@ -21,45 +36,39 @@ public class DimAtividadeController {
         this.dimAtividadeService = dimAtividadeService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<DimAtividadeDTO>> getAllEntities() {
-        List<DimAtividadeDTO> dimAtividadeDTOs = dimAtividadeService.getAllEntities();
-        return ResponseEntity.ok(dimAtividadeDTOs);
-    }
+   @GetMapping
+   public ResponseEntity<List<DimAtividadeDTO>> getAllEntities() {
+       List<DimAtividadeDTO> dimAtividadeDTOs = dimAtividadeService.getAllEntities();
+       return ok(dimAtividadeDTOs);
+   }
 
     @GetMapping("/{id}")
     public ResponseEntity<DimAtividadeDTO> getDimAtividadeById(@PathVariable Long id) {
         DimAtividadeDTO dimAtividadeDTO = dimAtividadeService.findById(id);
         if (dimAtividadeDTO == null) {
-            return ResponseEntity.notFound().build();
+            return notFound();
         }
-        return ResponseEntity.ok(dimAtividadeDTO);
+        return ok(dimAtividadeDTO);
     }
 
-    @GetMapping("/projeto/{projetoId}")
-    public ResponseEntity<List<DimAtividadeDTO>> getAtividadesByProjeto(@PathVariable Long projetoId) {
-        List<DimAtividadeDTO> atividades = dimAtividadeService.findByProjetoId(projetoId);
-        return ResponseEntity.ok(atividades);
-    }
-
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<DimAtividadeDTO> addDimAtividade(@RequestBody DimAtividadeDTO dimAtividadeDTO) {
         DimAtividadeDTO createdEntity = dimAtividadeService.save(dimAtividadeDTO);
-        return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
+        return created(createdEntity);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DimAtividadeDTO> updateDimAtividade(@PathVariable Long id, @RequestBody DimAtividadeDTO dimAtividadeDTO) {
         DimAtividadeDTO updatedEntity = dimAtividadeService.update(id, dimAtividadeDTO);
         if (updatedEntity == null) {
-            return ResponseEntity.notFound().build();
+            return notFound();
         }
-        return ResponseEntity.ok(updatedEntity);
+        return ok(updatedEntity);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDimAtividade(@PathVariable Long id) {
         dimAtividadeService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return noContent();
     }
 }

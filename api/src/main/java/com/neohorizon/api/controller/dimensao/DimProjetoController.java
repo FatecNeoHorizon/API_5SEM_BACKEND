@@ -1,18 +1,25 @@
 package com.neohorizon.api.controller.dimensao;
 
-import com.neohorizon.api.dto.DimProjetoDTO;
-import com.neohorizon.api.service.dimensao.DimProjetoService;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.neohorizon.api.controller.comum.BaseController;
+import com.neohorizon.api.dto.response.dimensao.DimProjetoDTO;
+import com.neohorizon.api.service.dimensao.DimProjetoService;
 
 @RestController
 @RequestMapping("/dim-projeto")
-public class DimProjetoController {
+public class DimProjetoController extends BaseController {
 
     private final DimProjetoService dimProjetoService;
 
@@ -22,39 +29,36 @@ public class DimProjetoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DimProjetoDTO>> getAllEntities(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description) {
-
+    public ResponseEntity<List<DimProjetoDTO>> getAllEntities() {
         List<DimProjetoDTO> dimProjetoDTOs = dimProjetoService.getAllEntities();
-        return ResponseEntity.ok(dimProjetoDTOs);
+        return ok(dimProjetoDTOs);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DimProjetoDTO> getDimProjetoById(@PathVariable Long id) {
         DimProjetoDTO dimProjetoDTO = dimProjetoService.findById(id);
         if (dimProjetoDTO == null) {
-            return ResponseEntity.notFound().build();
+            return notFound();
         }
-        return ResponseEntity.ok(dimProjetoDTO);
+        return ok(dimProjetoDTO);
     }
 
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<DimProjetoDTO> addDimProjeto(@RequestBody DimProjetoDTO dimProjetoDTO) {
         DimProjetoDTO createdEntity = dimProjetoService.save(dimProjetoDTO);
-        return new ResponseEntity<>(createdEntity, HttpStatus.CREATED);
+        return created(createdEntity);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DimProjetoDTO> updateDimProjeto(@PathVariable Long id, @RequestBody DimProjetoDTO dimProjetoDTO) {
         DimProjetoDTO updatedEntity = dimProjetoService.update(id, dimProjetoDTO);
-        return ResponseEntity.ok(updatedEntity);
+        return ok(updatedEntity);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDimProjeto(@PathVariable Long id) {
         dimProjetoService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return noContent();
     }
 
 }

@@ -1,112 +1,60 @@
 package com.neohorizon.api.service.dimensao;
 
-import com.neohorizon.api.dto.DimProjetoDTO;
-import com.neohorizon.api.entity.DimProjeto;
-import com.neohorizon.api.exception.EntityNotFoundException;
-import com.neohorizon.api.exception.BusinessException;
-import com.neohorizon.api.repository.DimProjetoRepository;
-import com.neohorizon.api.utils.ValidationUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.neohorizon.api.dto.response.dimensao.DimProjetoDTO;
+import com.neohorizon.api.entity.dimensao.DimProjeto;
+import com.neohorizon.api.mapper.DimensionMapper;
+import com.neohorizon.api.repository.dimensao.DimProjetoRepository;
 
 @Service
 public class DimProjetoService {
 
-    private static final String ENTITY_NAME = "DimProjeto";
     private final DimProjetoRepository dimProjetoRepository;
+    private final DimensionMapper dimensionMapper;
 
     @Autowired
-    public DimProjetoService(DimProjetoRepository dimProjetoRepository) {
+    public DimProjetoService(DimProjetoRepository dimProjetoRepository, DimensionMapper dimensionMapper) {
         this.dimProjetoRepository = dimProjetoRepository;
+        this.dimensionMapper = dimensionMapper;
     }
 
     public List<DimProjetoDTO> getAllEntities() {
         return dimProjetoRepository.findAll()
-                .stream()
-                .map(this::convertToDTO)
-                .toList();
+                .parallelStream()
+                .map(dimensionMapper::projetoToDTO)
+                .collect(Collectors.toList());
     }
 
     public DimProjetoDTO findById(Long id) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        
         return dimProjetoRepository.findById(id)
-                .map(this::convertToDTO)
-                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+                .map(dimensionMapper::projetoToDTO)
+                .orElse(null);
     }
 
     public DimProjetoDTO save(DimProjetoDTO dimProjetoDTO) {
-        ValidationUtils.requireNonNull(dimProjetoDTO, ENTITY_NAME + " é obrigatório");
-        validateDimProjetoDTO(dimProjetoDTO);
-        
-        DimProjeto dimProjeto = convertToEntity(dimProjetoDTO);
+        DimProjeto dimProjeto = dimensionMapper.dtoToProjeto(dimProjetoDTO);
         DimProjeto savedEntity = dimProjetoRepository.save(dimProjeto);
-        return convertToDTO(savedEntity);
+        return dimensionMapper.projetoToDTO(savedEntity);
     }
 
     public DimProjetoDTO update(Long id, DimProjetoDTO dimProjetoDTO) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        ValidationUtils.requireNonNull(dimProjetoDTO, ENTITY_NAME + " é obrigatório para atualização");
-        validateDimProjetoDTO(dimProjetoDTO);
-        
         DimProjeto existingEntity = dimProjetoRepository.findById(id)
-                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+                .orElseThrow(() -> new IllegalArgumentException("DimProjeto com ID " + id + " não encontrado."));
 
         existingEntity.setNome(dimProjetoDTO.getNome());
         existingEntity.setKey(dimProjetoDTO.getKey());
-        existingEntity.setJira_id(dimProjetoDTO.getJira_id());
+        existingEntity.setProjeto_jira_id(dimProjetoDTO.getProjeto_jira_id());
 
         DimProjeto updatedEntity = dimProjetoRepository.save(existingEntity);
-        return convertToDTO(updatedEntity);
+        return dimensionMapper.projetoToDTO(updatedEntity);
     }
 
     public void deleteById(Long id) {
-        ValidationUtils.requireValidId(id, ENTITY_NAME);
-        
-        if (!dimProjetoRepository.existsById(id)) {
-            throw EntityNotFoundException.forId(ENTITY_NAME, id);
-        }
-        
-        try {
-            dimProjetoRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
-        }
-    }
-
-    private void validateDimProjetoDTO(DimProjetoDTO dto) {
-        ValidationUtils.requireNonEmpty(dto.getNome(), "Nome");
-        ValidationUtils.requireNonEmpty(dto.getKey(), "Key");
-        ValidationUtils.requireNonEmpty(dto.getJira_id(), "Jira ID");
-    }
-
-    private DimProjetoDTO convertToDTO(DimProjeto entity) {
-        if (entity == null) {
-            return null;
-        }
-        DimProjetoDTO dto = new DimProjetoDTO();
-        dto.setId(entity.getId());
-        dto.setNome(entity.getNome());
-        dto.setKey(entity.getKey());
-        dto.setJira_id(entity.getJira_id());
-
-        return dto;
-    }
-
-    private DimProjeto convertToEntity(DimProjetoDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-        DimProjeto entity = new DimProjeto();
-        entity.setId(dto.getId());
-
-        entity.setNome(dto.getNome());
-        entity.setKey(dto.getKey());
-        entity.setJira_id(dto.getJira_id());
-
-        return entity;
+        dimProjetoRepository.deleteById(id);
     }
 }
