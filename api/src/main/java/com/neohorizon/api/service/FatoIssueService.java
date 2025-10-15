@@ -5,8 +5,11 @@ import com.neohorizon.api.dto.IssueDTO.IssueAgregationDTO;
 import com.neohorizon.api.dto.IssueDTO.ProjectIssueCountDTO;
 import com.neohorizon.api.entity.FatoIssue;
 import com.neohorizon.api.enums.AggregationType;
+import com.neohorizon.api.exception.EntityNotFoundException;
+import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.repository.FatoIssueRepository;
 import com.neohorizon.api.utils.ConvertStringToInteger;
+import com.neohorizon.api.utils.ValidationUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import java.util.List;
 @Service
 public class FatoIssueService {
 
+    private static final String ENTITY_NAME = "FatoIssue";
     private final FatoIssueRepository fatoIssueRepository;
 
     @Autowired
@@ -31,20 +35,29 @@ public class FatoIssueService {
     }
 
     public FatoIssueDTO findById(Long id) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
         return fatoIssueRepository.findById(id)
                 .map(this::convertToDTO)
-                .orElse(null);
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
     public FatoIssueDTO save(FatoIssueDTO fatoIssueDTO) {
+        ValidationUtils.requireNonNull(fatoIssueDTO, ENTITY_NAME + " é obrigatório");
+        validateFatoIssueDTO(fatoIssueDTO);
+        
         FatoIssue fatoIssue = convertToEntity(fatoIssueDTO);
         FatoIssue savedEntity = fatoIssueRepository.save(fatoIssue);
         return convertToDTO(savedEntity);
     }
 
     public FatoIssueDTO update(Long id, FatoIssueDTO fatoIssueDTO) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(fatoIssueDTO, ENTITY_NAME + " é obrigatório para atualização");
+        validateFatoIssueDTO(fatoIssueDTO);
+        
         FatoIssue existingEntity = fatoIssueRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("FatoIssue with ID " + id + " not found."));
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
 
         existingEntity.setDimProjeto(fatoIssueDTO.getDimProjeto());
         existingEntity.setDimPeriodo(fatoIssueDTO.getDimPeriodo());
@@ -57,7 +70,26 @@ public class FatoIssueService {
     }
 
     public void deleteById(Long id) {
-        fatoIssueRepository.deleteById(id);
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        if (!fatoIssueRepository.existsById(id)) {
+            throw EntityNotFoundException.forId(ENTITY_NAME, id);
+        }
+        
+        try {
+            fatoIssueRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
+        }
+    }
+
+    private void validateFatoIssueDTO(FatoIssueDTO dto) {
+        ValidationUtils.requireNonNull(dto.getDimProjeto(), "Projeto");
+        ValidationUtils.requireNonNull(dto.getDimPeriodo(), "Período");
+        ValidationUtils.requireNonNull(dto.getDimStatus(), "Status");
+        ValidationUtils.requireNonNull(dto.getDimTipo(), "Tipo");
+        ValidationUtils.require(dto.getQuantidade() != null && dto.getQuantidade() >= 0, 
+            "Quantidade deve ser um valor positivo");
     }
 
     private FatoIssueDTO convertToDTO(FatoIssue entity) {

@@ -6,10 +6,13 @@ import com.neohorizon.api.entity.FatoApontamentoHoras;
 import com.neohorizon.api.entity.DimDev;
 import com.neohorizon.api.entity.DimAtividade;
 import com.neohorizon.api.entity.DimProjeto;
+import com.neohorizon.api.exception.EntityNotFoundException;
+import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.repository.FatoApontamentoHorasRepository;
 import com.neohorizon.api.repository.DimDevRepository;
 import com.neohorizon.api.repository.DimAtividadeRepository;
 import com.neohorizon.api.repository.DimProjetoRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,7 @@ import java.util.List;
 @Service
 public class FatoApontamentoHorasService {
 
+    private static final String ENTITY_NAME = "FatoApontamentoHoras";
     private final FatoApontamentoHorasRepository fatoApontamentoHorasRepository;
     private final DimDevRepository dimDevRepository;
     private final DimAtividadeRepository dimAtividadeRepository;
@@ -45,20 +49,30 @@ public class FatoApontamentoHorasService {
     }
 
     public FatoApontamentoHorasDTO findById(Long id) {
-        FatoApontamentoHoras entity = fatoApontamentoHorasRepository.findById(id).orElse(null);
-        return entity != null ? convertToDTO(entity) : null;
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        return fatoApontamentoHorasRepository.findById(id)
+                .map(this::convertToDTO)
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
     public List<FatoApontamentoHorasDTO> findByPeriodo(LocalDate dataInicio, LocalDate dataFim) {
+        ValidationUtils.requireNonNull(dataInicio, "Data de início");
+        ValidationUtils.requireNonNull(dataFim, "Data de fim");
+        ValidationUtils.require(dataFim.isAfter(dataInicio) || dataFim.isEqual(dataInicio), 
+            "Data fim deve ser posterior ou igual à data início");
+        
         List<FatoApontamentoHoras> entities = fatoApontamentoHorasRepository.findByPeriodo(dataInicio, dataFim);
         return entities.stream()
                 .map(this::convertToDTO)
                 .toList();
     }
 
-        @Transactional
+    @Transactional
     public FatoApontamentoHorasDTO create(FatoApontamentoHorasDTO dto) {
+        ValidationUtils.requireNonNull(dto, ENTITY_NAME + " é obrigatório");
         validateRequiredFields(dto);
+        
         FatoApontamentoHoras entity = convertToEntity(dto);
         entity = fatoApontamentoHorasRepository.save(entity);
         return convertToDTO(entity);
@@ -66,9 +80,11 @@ public class FatoApontamentoHorasService {
 
     @Transactional
     public FatoApontamentoHorasDTO update(Long id, FatoApontamentoHorasDTO dto) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(dto, ENTITY_NAME + " é obrigatório para atualização");
+        
         FatoApontamentoHoras existingEntity = fatoApontamentoHorasRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                    MessageConstants.appointmentNotFound(id)));
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
         
         updateEntityFromDTO(existingEntity, dto);
         FatoApontamentoHoras updatedEntity = fatoApontamentoHorasRepository.save(existingEntity);
@@ -76,25 +92,26 @@ public class FatoApontamentoHorasService {
     }
 
     public void deleteById(Long id) {
-        fatoApontamentoHorasRepository.deleteById(id);
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        if (!fatoApontamentoHorasRepository.existsById(id)) {
+            throw EntityNotFoundException.forId(ENTITY_NAME, id);
+        }
+        
+        try {
+            fatoApontamentoHorasRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
+        }
     }
 
     private void validateRequiredFields(FatoApontamentoHorasDTO dto) {
-        if (dto.getDevId() == null) {
-            throw new IllegalArgumentException("ID do desenvolvedor é obrigatório");
-        }
-        if (dto.getAtividadeId() == null) {
-            throw new IllegalArgumentException("ID da atividade é obrigatório");
-        }
-        if (dto.getProjetoId() == null) {
-            throw new IllegalArgumentException("ID do projeto é obrigatório");
-        }
-        if (dto.getDataApontamento() == null) {
-            throw new IllegalArgumentException("Data do apontamento é obrigatória");
-        }
-        if (dto.getHorasTrabalhadas() == null || dto.getHorasTrabalhadas() <= 0) {
-            throw new IllegalArgumentException("Horas trabalhadas deve ser maior que zero");
-        }
+        ValidationUtils.requireNonNull(dto.getDevId(), MessageConstants.DEVELOPER_ID_REQUIRED);
+        ValidationUtils.requireNonNull(dto.getAtividadeId(), MessageConstants.ACTIVITY_ID_REQUIRED);
+        ValidationUtils.requireNonNull(dto.getProjetoId(), MessageConstants.PROJECT_ID_REQUIRED);
+        ValidationUtils.requireNonNull(dto.getDataApontamento(), MessageConstants.DATE_REQUIRED);
+        ValidationUtils.require(dto.getHorasTrabalhadas() != null && dto.getHorasTrabalhadas() > 0, 
+            MessageConstants.HOURS_INVALID);
     }
 
     private FatoApontamentoHorasDTO convertToDTO(FatoApontamentoHoras entity) {
@@ -117,18 +134,15 @@ public class FatoApontamentoHorasService {
     private FatoApontamentoHoras convertToEntity(FatoApontamentoHorasDTO dto) {
         // Validar e buscar desenvolvedor
         DimDev dev = dimDevRepository.findById(dto.getDevId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                    MessageConstants.developerNotFound(dto.getDevId())));
+                .orElseThrow(() -> EntityNotFoundException.forId("DimDev", dto.getDevId()));
         
         // Validar e buscar atividade
         DimAtividade atividade = dimAtividadeRepository.findById(dto.getAtividadeId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                    MessageConstants.activityNotFound(dto.getAtividadeId())));
+                .orElseThrow(() -> EntityNotFoundException.forId("DimAtividade", dto.getAtividadeId()));
         
         // Validar e buscar projeto
         DimProjeto projeto = dimProjetoRepository.findById(dto.getProjetoId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                    MessageConstants.projectNotFound(dto.getProjetoId())));
+                .orElseThrow(() -> EntityNotFoundException.forId("DimProjeto", dto.getProjetoId()));
 
         return FatoApontamentoHoras.builder()
                 .id(dto.getId())
@@ -144,26 +158,24 @@ public class FatoApontamentoHorasService {
     private void updateEntityFromDTO(FatoApontamentoHoras entity, FatoApontamentoHorasDTO dto) {
         if (dto.getDevId() != null) {
             DimDev dev = dimDevRepository.findById(dto.getDevId())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                        MessageConstants.developerNotFound(dto.getDevId())));
+                    .orElseThrow(() -> EntityNotFoundException.forId("DimDev", dto.getDevId()));
             entity.setDimDev(dev);
         }
         if (dto.getAtividadeId() != null) {
             DimAtividade atividade = dimAtividadeRepository.findById(dto.getAtividadeId())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                        MessageConstants.activityNotFound(dto.getAtividadeId())));
+                    .orElseThrow(() -> EntityNotFoundException.forId("DimAtividade", dto.getAtividadeId()));
             entity.setDimAtividade(atividade);
         }
         if (dto.getProjetoId() != null) {
             DimProjeto projeto = dimProjetoRepository.findById(dto.getProjetoId())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                        MessageConstants.projectNotFound(dto.getProjetoId())));
+                    .orElseThrow(() -> EntityNotFoundException.forId("DimProjeto", dto.getProjetoId()));
             entity.setDimProjeto(projeto);
         }
         if (dto.getDataApontamento() != null) {
             entity.setDataApontamento(dto.getDataApontamento());
         }
         if (dto.getHorasTrabalhadas() != null) {
+            ValidationUtils.require(dto.getHorasTrabalhadas() > 0, MessageConstants.HOURS_INVALID);
             entity.setHorasTrabalhadas(dto.getHorasTrabalhadas());
         }
         if (dto.getDescricaoTrabalho() != null) {

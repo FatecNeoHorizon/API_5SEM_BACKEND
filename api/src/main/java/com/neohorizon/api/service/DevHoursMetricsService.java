@@ -4,7 +4,9 @@ import com.neohorizon.api.dto.DevHoursMetricsDTO;
 import com.neohorizon.api.entity.FatoApontamentoHoras;
 import com.neohorizon.api.entity.DimDev;
 import com.neohorizon.api.entity.DimAtividade;
+import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.repository.FatoApontamentoHorasRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,19 @@ public class DevHoursMetricsService {
 
     public List<DevHoursMetricsDTO> getDevHoursMetrics(Long devId, Long activityId, 
                                                       LocalDate fromDate, LocalDate toDate) {
+        // Validar IDs se fornecidos
+        if (devId != null) {
+            ValidationUtils.requireValidId(devId, "Desenvolvedor");
+        }
+        if (activityId != null) {
+            ValidationUtils.requireValidId(activityId, "Atividade");
+        }
+        
+        // Validar datas se fornecidas
+        if (fromDate != null && toDate != null) {
+            ValidationUtils.require(toDate.isAfter(fromDate) || toDate.isEqual(fromDate), 
+                "Data fim deve ser posterior ou igual à data início");
+        }
         
         List<FatoApontamentoHoras> apontamentos = getApontamentosByFilters(devId, activityId, fromDate, toDate);
         
@@ -102,24 +117,27 @@ public class DevHoursMetricsService {
 
     private List<FatoApontamentoHoras> getApontamentosByFilters(Long devId, Long activityId, 
                                                               LocalDate fromDate, LocalDate toDate) {
-        
         // Se não especificou datas, usar últimos 30 dias
-        if (fromDate == null) {
-            fromDate = LocalDate.now().minusDays(30);
-        }
-        if (toDate == null) {
-            toDate = LocalDate.now();
-        }
+        LocalDate effectiveFromDate = fromDate != null ? fromDate : LocalDate.now().minusDays(30);
+        LocalDate effectiveToDate = toDate != null ? toDate : LocalDate.now();
 
         // Aplicar filtros baseado nos parâmetros
-        if (devId != null && activityId != null) {
-            return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(devId, activityId, fromDate, toDate);
-        } else if (devId != null) {
-            return fatoApontamentoHorasRepository.findByDevAndPeriodo(devId, fromDate, toDate);
-        } else if (activityId != null) {
-            return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(activityId, fromDate, toDate);
-        } else {
-            return fatoApontamentoHorasRepository.findByPeriodo(fromDate, toDate);
+        try {
+            if (devId != null && activityId != null) {
+                return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(
+                    devId, activityId, effectiveFromDate, effectiveToDate);
+            } else if (devId != null) {
+                return fatoApontamentoHorasRepository.findByDevAndPeriodo(
+                    devId, effectiveFromDate, effectiveToDate);
+            } else if (activityId != null) {
+                return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(
+                    activityId, effectiveFromDate, effectiveToDate);
+            } else {
+                return fatoApontamentoHorasRepository.findByPeriodo(
+                    effectiveFromDate, effectiveToDate);
+            }
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao buscar apontamentos: " + e.getMessage(), e);
         }
     }
 }

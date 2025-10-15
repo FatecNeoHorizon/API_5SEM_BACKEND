@@ -2,17 +2,20 @@ package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.DimStatusDTO;
 import com.neohorizon.api.entity.DimStatus;
+import com.neohorizon.api.exception.EntityNotFoundException;
+import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.repository.DimStatusRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DimStatusService {
 
+    private static final String ENTITY_NAME = "DimStatus";
     private final DimStatusRepository dimStatusRepository;
 
     @Autowired
@@ -24,24 +27,33 @@ public class DimStatusService {
         return dimStatusRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public DimStatusDTO findById(Long id) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
         return dimStatusRepository.findById(id)
                 .map(this::convertToDTO)
-                .orElse(null);
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
     public DimStatusDTO save(DimStatusDTO dimStatusDTO) {
+        ValidationUtils.requireNonNull(dimStatusDTO, ENTITY_NAME + " é obrigatório");
+        validateDimStatusDTO(dimStatusDTO);
+        
         DimStatus dimStatus = convertToEntity(dimStatusDTO);
         DimStatus savedEntity = dimStatusRepository.save(dimStatus);
         return convertToDTO(savedEntity);
     }
 
     public DimStatusDTO update(Long id, DimStatusDTO dimStatusDTO) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(dimStatusDTO, ENTITY_NAME + " é obrigatório para atualização");
+        validateDimStatusDTO(dimStatusDTO);
+        
         DimStatus existingEntity = dimStatusRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("DimStatus with ID " + id + " not found."));
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
 
         existingEntity.setNome(dimStatusDTO.getNome());
         existingEntity.setDescricao(dimStatusDTO.getDescricao());
@@ -51,7 +63,21 @@ public class DimStatusService {
     }
 
     public void deleteById(Long id) {
-        dimStatusRepository.deleteById(id);
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        if (!dimStatusRepository.existsById(id)) {
+            throw EntityNotFoundException.forId(ENTITY_NAME, id);
+        }
+        
+        try {
+            dimStatusRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
+        }
+    }
+
+    private void validateDimStatusDTO(DimStatusDTO dto) {
+        ValidationUtils.requireNonEmpty(dto.getNome(), "Nome");
     }
 
     private DimStatusDTO convertToDTO(DimStatus entity) {

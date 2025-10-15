@@ -17,11 +17,15 @@ import com.neohorizon.api.entity.DimDev;
 import com.neohorizon.api.entity.DimPeriodo;
 import com.neohorizon.api.entity.DimProjeto;
 import com.neohorizon.api.entity.FatoCustoHora;
+import com.neohorizon.api.exception.EntityNotFoundException;
+import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.repository.FatoCustoHoraRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 @Service
 public class FatoCustoHoraService {
 
+    private static final String ENTITY_NAME = "FatoCustoHora";
     private final FatoCustoHoraRepository repo;
 
     @Autowired
@@ -109,20 +113,29 @@ public class FatoCustoHoraService {
      }
 
      public FatoCustoHoraDTO findById(Long id) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
         return repo.findById(id)
                 .map(this::convertToDTO)
-                .orElse(null);
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
      public FatoCustoHoraDTO save(FatoCustoHoraDTO fatoCustoHoraDTO) {
+        ValidationUtils.requireNonNull(fatoCustoHoraDTO, ENTITY_NAME + " é obrigatório");
+        validateFatoCustoHoraDTO(fatoCustoHoraDTO);
+        
         FatoCustoHora fatoCustoHora = convertToEntity(fatoCustoHoraDTO);
         FatoCustoHora savedEntity = repo.save(fatoCustoHora);
         return convertToDTO(savedEntity);
     }
 
     public FatoCustoHoraDTO update(Long id, FatoCustoHoraDTO fatoCustoHoraDTO) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(fatoCustoHoraDTO, ENTITY_NAME + " é obrigatório para atualização");
+        validateFatoCustoHoraDTO(fatoCustoHoraDTO);
+        
         FatoCustoHora existingEntity = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("FatoCustoHora with ID " + id + " not found."));
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
 
         existingEntity.setDimProjeto(fatoCustoHoraDTO.getDimProjeto());
         existingEntity.setDimPeriodo(fatoCustoHoraDTO.getDimPeriodo());
@@ -135,7 +148,27 @@ public class FatoCustoHoraService {
     }
 
     public void deleteById(Long id) {
-        repo.deleteById(id);
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        if (!repo.existsById(id)) {
+            throw EntityNotFoundException.forId(ENTITY_NAME, id);
+        }
+        
+        try {
+            repo.deleteById(id);
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
+        }
+    }
+
+    private void validateFatoCustoHoraDTO(FatoCustoHoraDTO dto) {
+        ValidationUtils.requireNonNull(dto.getDimProjeto(), "Projeto");
+        ValidationUtils.requireNonNull(dto.getDimPeriodo(), "Período");
+        ValidationUtils.requireNonNull(dto.getDimDev(), "Desenvolvedor");
+        ValidationUtils.require(dto.getCusto() != null && dto.getCusto() >= 0, 
+            "Custo deve ser um valor positivo");
+        ValidationUtils.require(dto.getHoras_quantidade() != null && dto.getHoras_quantidade() >= 0, 
+            "Quantidade de horas deve ser um valor positivo");
     }
 
     private FatoCustoHoraDTO convertToDTO(FatoCustoHora entity) {

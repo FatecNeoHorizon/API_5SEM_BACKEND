@@ -2,17 +2,20 @@ package com.neohorizon.api.service;
 
 import com.neohorizon.api.dto.DimTipoDTO;
 import com.neohorizon.api.entity.DimTipo;
+import com.neohorizon.api.exception.EntityNotFoundException;
+import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.repository.DimTipoRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DimTipoService {
 
+    private static final String ENTITY_NAME = "DimTipo";
     private final DimTipoRepository dimTipoRepository;
 
     @Autowired
@@ -24,24 +27,33 @@ public class DimTipoService {
         return dimTipoRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public DimTipoDTO findById(Long id) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
         return dimTipoRepository.findById(id)
                 .map(this::convertToDTO)
-                .orElse(null);
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
     public DimTipoDTO save(DimTipoDTO dimTipoDTO) {
+        ValidationUtils.requireNonNull(dimTipoDTO, ENTITY_NAME + " é obrigatório");
+        validateDimTipoDTO(dimTipoDTO);
+        
         DimTipo dimTipo = convertToEntity(dimTipoDTO);
         DimTipo savedEntity = dimTipoRepository.save(dimTipo);
         return convertToDTO(savedEntity);
     }
 
     public DimTipoDTO update(Long id, DimTipoDTO dimTipoDTO) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(dimTipoDTO, ENTITY_NAME + " é obrigatório para atualização");
+        validateDimTipoDTO(dimTipoDTO);
+        
         DimTipo existingEntity = dimTipoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("DimTipo with ID " + id + " not found."));
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
 
         existingEntity.setNome(dimTipoDTO.getNome());
         existingEntity.setDescricao(dimTipoDTO.getDescricao());
@@ -51,7 +63,21 @@ public class DimTipoService {
     }
 
     public void deleteById(Long id) {
-        dimTipoRepository.deleteById(id);
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        if (!dimTipoRepository.existsById(id)) {
+            throw EntityNotFoundException.forId(ENTITY_NAME, id);
+        }
+        
+        try {
+            dimTipoRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
+        }
+    }
+
+    private void validateDimTipoDTO(DimTipoDTO dto) {
+        ValidationUtils.requireNonEmpty(dto.getNome(), "Nome");
     }
 
     private DimTipoDTO convertToDTO(DimTipo entity) {
