@@ -1,5 +1,5 @@
 // src/main/java/com/neohorizon/api/controller/FatoCustoHoraController.java
-package com.neohorizon.api.controller;
+package com.neohorizon.api.controller.fato;
 
 import java.util.List;
 

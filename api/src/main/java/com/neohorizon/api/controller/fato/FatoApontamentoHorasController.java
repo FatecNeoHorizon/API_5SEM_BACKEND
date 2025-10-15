@@ -1,4 +1,4 @@
-package com.neohorizon.api.controller;
+package com.neohorizon.api.controller.fato;
 
 import com.neohorizon.api.dto.FatoApontamentoHorasDTO;
 import com.neohorizon.api.service.fato.FatoApontamentoHorasService;

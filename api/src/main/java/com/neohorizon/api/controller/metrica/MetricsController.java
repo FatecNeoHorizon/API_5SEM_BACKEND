@@ -1,4 +1,4 @@
-package com.neohorizon.api.controller;
+package com.neohorizon.api.controller.metrica;
 
 import com.neohorizon.api.dto.DevHoursMetricsDTO;
 import com.neohorizon.api.service.metrica.DevHoursMetricsService;

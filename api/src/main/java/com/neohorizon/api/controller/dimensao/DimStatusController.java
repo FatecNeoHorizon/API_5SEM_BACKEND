@@ -1,4 +1,4 @@
-package com.neohorizon.api.controller;
+package com.neohorizon.api.controller.dimensao;
 
 import com.neohorizon.api.dto.DimStatusDTO;
 import com.neohorizon.api.service.dimensao.DimStatusService;
