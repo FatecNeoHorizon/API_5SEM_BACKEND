@@ -168,7 +168,7 @@ public class FatoCustoHoraService {
         existingEntity.setDimPeriodo(fatoCustoHoraDTO.getDimPeriodo());
         existingEntity.setDimDev(fatoCustoHoraDTO.getDimDev());
         existingEntity.setCusto(fatoCustoHoraDTO.getCusto());
-        existingEntity.setHoras_quantidade(fatoCustoHoraDTO.getHoras_quantidade());
+        existingEntity.setHorasQuantidade(fatoCustoHoraDTO.getHorasQuantidade());
 
         FatoCustoHora updatedEntity = repo.save(existingEntity);
         return fatoMapper.custoHoraToDTO(updatedEntity);

@@ -45,13 +45,13 @@ public interface DimensionMapper {
     // Entidade -> DTO
     @Mapping(source = "id", target = "id")
     @Mapping(source = "nome", target = "nome")
-    @Mapping(source = "custo_hora", target = "custo_hora")
+    @Mapping(source = "custoHora", target = "custoHora")
     DimDevDTO devToDTO(DimDev dimDev);
 
     // DTO -> Entidade
     @Mapping(source = "id", target = "id")
     @Mapping(source = "nome", target = "nome")
-    @Mapping(source = "custo_hora", target = "custo_hora")
+    @Mapping(source = "custoHora", target = "custoHora")
     DimDev dtoToDev(DimDevDTO dimDevDTO);
 
     // Lista de Dimensão Desenvolvedor    

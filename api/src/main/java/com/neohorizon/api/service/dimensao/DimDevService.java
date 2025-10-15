@@ -55,7 +55,7 @@ public class DimDevService {
         return dimDevRepository.findById(id)
                 .map(existingEntity -> {
                     existingEntity.setNome(dimDevDTO.getNome());
-                    existingEntity.setCusto_hora(dimDevDTO.getCusto_hora());
+                    existingEntity.setCustoHora(dimDevDTO.getCustoHora());
                     DimDev updatedEntity = dimDevRepository.save(existingEntity);
                     return dimensionMapper.devToDTO(updatedEntity);
                 })
@@ -81,7 +81,7 @@ public class DimDevService {
         ValidationUtils.requireNonEmpty(dimDevDTO.getNome(), "Nome");
         
         ValidationUtils.require(
-            dimDevDTO.getCusto_hora() != null && dimDevDTO.getCusto_hora().compareTo(java.math.BigDecimal.ZERO) >= 0, 
+            dimDevDTO.getCustoHora() != null && dimDevDTO.getCustoHora().compareTo(java.math.BigDecimal.ZERO) >= 0,
             "Custo por hora deve ser um valor positivo"
         );
     }

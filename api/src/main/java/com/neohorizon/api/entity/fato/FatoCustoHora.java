@@ -48,5 +48,5 @@ public class FatoCustoHora {
     private BigDecimal custo;
 
     @Column(name = "horas_quantidade", precision = 10, scale = 2)
-    private BigDecimal horas_quantidade;
+    private BigDecimal horasQuantidade;
 }

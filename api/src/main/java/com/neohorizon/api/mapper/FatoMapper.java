@@ -67,14 +67,14 @@ public interface FatoMapper {
     @Mapping(source = "dimPeriodo", target = "dimPeriodo")
     @Mapping(source = "dimDev", target = "dimDev")
     @Mapping(source = "custo", target = "custo")
-    @Mapping(source = "horas_quantidade", target = "horas_quantidade")
+    @Mapping(source = "horasQuantidade", target = "horasQuantidade")
     FatoCustoHoraDTO custoHoraToDTO(FatoCustoHora fatoCustoHora);
 
     @Mapping(source = "dimProjeto", target = "dimProjeto")
     @Mapping(source = "dimPeriodo", target = "dimPeriodo")
     @Mapping(source = "dimDev", target = "dimDev")
     @Mapping(source = "custo", target = "custo")
-    @Mapping(source = "horas_quantidade", target = "horas_quantidade")
+    @Mapping(source = "horasQuantidade", target = "horasQuantidade")
     FatoCustoHora dtoToCustoHora(FatoCustoHoraDTO fatoCustoHoraDTO);
     
     List<FatoCustoHoraDTO> custoHoraListToDTO(List<FatoCustoHora> fatoCustoHoras);
