@@ -1,6 +1,7 @@
 package com.neohorizon.api.service.metrica;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -15,7 +16,9 @@ import com.neohorizon.api.dto.metrica.DevHoursMetricsDTO;
 import com.neohorizon.api.entity.dimensao.DimAtividade;
 import com.neohorizon.api.entity.dimensao.DimDev;
 import com.neohorizon.api.entity.fato.FatoApontamentoHoras;
+import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.repository.fato.FatoApontamentoHorasRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 @Service
 public class DevHoursMetricsService {
@@ -29,6 +32,19 @@ public class DevHoursMetricsService {
 
     public List<DevHoursMetricsDTO> getDevHoursMetrics(Long devId, Long activityId, 
                                                       LocalDate fromDate, LocalDate toDate) {
+        // Validar IDs se fornecidos
+        if (devId != null) {
+            ValidationUtils.requireValidId(devId, "Desenvolvedor");
+        }
+        if (activityId != null) {
+            ValidationUtils.requireValidId(activityId, "Atividade");
+        }
+        
+        // Validar datas se fornecidas
+        if (fromDate != null && toDate != null) {
+            ValidationUtils.require(toDate.isAfter(fromDate) || toDate.isEqual(fromDate), 
+                "Data fim deve ser posterior ou igual à data início");
+        }
         
         List<FatoApontamentoHoras> apontamentos = getApontamentosByFilters(devId, activityId, fromDate, toDate);
         
@@ -48,7 +64,7 @@ public class DevHoursMetricsService {
                 .toList();
     }
 
-       private DevHoursMetricsDTO processDevApontamentos(List<FatoApontamentoHoras> devApontamentos) {
+    private DevHoursMetricsDTO processDevApontamentos(List<FatoApontamentoHoras> devApontamentos) {
         if (devApontamentos.isEmpty()) {
             return null;
         }
@@ -110,17 +126,21 @@ public class DevHoursMetricsService {
     private List<FatoApontamentoHoras> getApontamentosByFilters(Long devId, Long activityId, 
                                                               LocalDate fromDate, LocalDate toDate) {
         // Converter LocalDate para LocalDateTime (início do dia e fim do dia)
-        java.time.LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : LocalDate.now().minusDays(30).atStartOfDay();
-        java.time.LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
+        LocalDateTime fromDateTime = (fromDate != null) ? fromDate.atStartOfDay() : LocalDate.now().minusDays(30).atStartOfDay();
+        LocalDateTime toDateTime = (toDate != null) ? toDate.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
 
-        if (devId != null && activityId != null) {
-            return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(devId, activityId, fromDateTime, toDateTime);
-        } else if (devId != null) {
-            return fatoApontamentoHorasRepository.findByDevAndPeriodo(devId, fromDateTime, toDateTime);
-        } else if (activityId != null) {
-            return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(activityId, fromDateTime, toDateTime);
-        } else {
-            return fatoApontamentoHorasRepository.findByPeriodo(fromDateTime, toDateTime);
+        try {
+            if (devId != null && activityId != null) {
+                return fatoApontamentoHorasRepository.findByDevAtividadeAndPeriodo(devId, activityId, fromDateTime, toDateTime);
+            } else if (devId != null) {
+                return fatoApontamentoHorasRepository.findByDevAndPeriodo(devId, fromDateTime, toDateTime);
+            } else if (activityId != null) {
+                return fatoApontamentoHorasRepository.findByAtividadeAndPeriodo(activityId, fromDateTime, toDateTime);
+            } else {
+                return fatoApontamentoHorasRepository.findByPeriodo(fromDateTime, toDateTime);
+            }
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao buscar apontamentos: " + e.getMessage(), e);
         }
     }
 }

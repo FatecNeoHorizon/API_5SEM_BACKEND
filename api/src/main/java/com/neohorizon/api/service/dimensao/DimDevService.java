@@ -6,12 +6,16 @@ import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimDevDTO;
 import com.neohorizon.api.entity.dimensao.DimDev;
+import com.neohorizon.api.exception.BusinessException;
+import com.neohorizon.api.exception.EntityNotFoundException;
 import com.neohorizon.api.mapper.DimensionMapper;
 import com.neohorizon.api.repository.dimensao.DimDevRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 @Service
 public class DimDevService {
 
+    private static final String ENTITY_NAME = "DimDev";
     private final DimDevRepository dimDevRepository;
     private final DimensionMapper dimensionMapper;
 
@@ -21,9 +25,11 @@ public class DimDevService {
     }
 
     public DimDevDTO getById(Long id) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
         return dimDevRepository.findById(id)
                 .map(dimensionMapper::devToDTO)
-                .orElse(null);
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
     public List<DimDevDTO> getAllEntities() {
@@ -33,27 +39,50 @@ public class DimDevService {
     }
 
     public DimDevDTO create(DimDevDTO dimDevDTO) {
+        ValidationUtils.requireNonNull(dimDevDTO, ENTITY_NAME + " é obrigatório");
+        validateDimDevDTO(dimDevDTO);
+        
         DimDev entity = dimensionMapper.dtoToDev(dimDevDTO);
         DimDev savedEntity = dimDevRepository.save(entity);
         return dimensionMapper.devToDTO(savedEntity);
     }
 
     public DimDevDTO update(Long id, DimDevDTO dimDevDTO) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(dimDevDTO, ENTITY_NAME + " é obrigatório para atualização");
+        validateDimDevDTO(dimDevDTO);
+        
         return dimDevRepository.findById(id)
                 .map(existingEntity -> {
                     existingEntity.setNome(dimDevDTO.getNome());
-                    existingEntity.setCusto_hora(dimDevDTO.getCusto_hora());
+                    existingEntity.setCustoHora(dimDevDTO.getCustoHora());
                     DimDev updatedEntity = dimDevRepository.save(existingEntity);
                     return dimensionMapper.devToDTO(updatedEntity);
                 })
-                .orElseThrow(() -> new IllegalArgumentException("DimDev com ID " + id + " não encontrado."));
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
     public boolean delete(Long id) {
-        if (dimDevRepository.existsById(id)) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        if (!dimDevRepository.existsById(id)) {
+            throw EntityNotFoundException.forId(ENTITY_NAME, id);
+        }
+        
+        try {
             dimDevRepository.deleteById(id);
             return true;
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
         }
-        return false;
+    }
+
+    private void validateDimDevDTO(DimDevDTO dimDevDTO) {
+        ValidationUtils.requireNonEmpty(dimDevDTO.getNome(), "Nome");
+        
+        ValidationUtils.require(
+            dimDevDTO.getCustoHora() != null && dimDevDTO.getCustoHora().compareTo(java.math.BigDecimal.ZERO) >= 0,
+            "Custo por hora deve ser um valor positivo"
+        );
     }
 }

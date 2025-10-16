@@ -31,7 +31,7 @@ public interface FatoCustoHoraRepository extends JpaRepository<FatoCustoHora, Lo
        List<Object[]> totalPorProjetoRaw();
 
        @Query("""
-                     select f.dimDev.id, f.dimDev.nome, coalesce(sum(f.horas_quantidade),0), coalesce(sum(f.custo),0)
+                     select f.dimDev.id, f.dimDev.nome, coalesce(sum(f.horasQuantidade),0), coalesce(sum(f.custo),0)
                      from FatoCustoHora f
                      group by f.dimDev.id, f.dimDev.nome
                      order by coalesce(sum(f.custo),0) desc

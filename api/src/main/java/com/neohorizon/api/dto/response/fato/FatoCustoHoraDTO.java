@@ -20,5 +20,5 @@ public class FatoCustoHoraDTO {
     private DimPeriodo dimPeriodo;
     private DimDev dimDev;
     private BigDecimal custo;
-    private BigDecimal horas_quantidade;
+    private BigDecimal horasQuantidade;
 }

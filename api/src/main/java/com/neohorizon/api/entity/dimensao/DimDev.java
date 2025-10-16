@@ -32,6 +32,6 @@ public class DimDev {
     private String nome;
 
     @Column(name = "dev_custo_hora", precision = 10, scale = 2)
-    private BigDecimal custo_hora;
+    private BigDecimal custoHora;
 
 }
