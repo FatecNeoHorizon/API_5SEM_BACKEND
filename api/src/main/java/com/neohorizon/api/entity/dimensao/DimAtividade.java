@@ -32,6 +32,9 @@ public class DimAtividade {
     @Column(name = "atividade_descricao")
     private String descricao;
 
+    @Column(name = "atividade_jira_id")
+    private String atividade_jira_id;
+
     @Column(name = "ativo")
     @Builder.Default
     private Boolean ativo = true;
