@@ -26,6 +26,7 @@ public interface DimensionMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "nome", target = "nome")
     @Mapping(source = "descricao", target = "descricao")
+    @Mapping(source = "atividade_jira_id", target = "atividade_jira_id")
     @Mapping(source = "ativo", target = "ativo")
     DimAtividadeDTO atividadeToDTO(DimAtividade dimAtividade);
 
@@ -33,6 +34,7 @@ public interface DimensionMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "nome", target = "nome")
     @Mapping(source = "descricao", target = "descricao")
+    @Mapping(source = "atividade_jira_id", target = "atividade_jira_id")
     @Mapping(source = "ativo", target = "ativo")
     DimAtividade dtoToAtividade(DimAtividadeDTO dimAtividadeDTO);
 

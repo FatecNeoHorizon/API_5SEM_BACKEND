@@ -41,7 +41,6 @@ public interface FatoMapper {
 
 
     // Fato Atividade (mapeamento direto pois DTO usa entidades)
-    @Mapping(source = "dimAtividade", target = "dimAtividade")
     @Mapping(source = "dimProjeto", target = "dimProjeto")
     @Mapping(source = "dimPeriodo", target = "dimPeriodo")
     @Mapping(source = "dimStatus", target = "dimStatus")
@@ -49,7 +48,6 @@ public interface FatoMapper {
     @Mapping(source = "quantidade", target = "quantidade")
     FatoAtividadeDTO fatoAtividadeToDTO(FatoAtividade fatoAtividade);
 
-    @Mapping(source = "dimAtividade", target = "dimAtividade")
     @Mapping(source = "dimProjeto", target = "dimProjeto")
     @Mapping(source = "dimPeriodo", target = "dimPeriodo")
     @Mapping(source = "dimStatus", target = "dimStatus")

@@ -2,7 +2,6 @@ package com.neohorizon.api.entity.fato;
 
 import java.math.BigDecimal;
 
-import com.neohorizon.api.entity.dimensao.DimAtividade;
 import com.neohorizon.api.entity.dimensao.DimPeriodo;
 import com.neohorizon.api.entity.dimensao.DimProjeto;
 import com.neohorizon.api.entity.dimensao.DimStatus;
@@ -38,10 +37,6 @@ public class FatoAtividade {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "fato_atividade_id")
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "atividade_id", nullable = false)
-    private DimAtividade dimAtividade;
 
     @ManyToOne
     @JoinColumn(name = "projeto_id", nullable = false)
