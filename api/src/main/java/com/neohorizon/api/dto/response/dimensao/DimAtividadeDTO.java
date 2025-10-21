@@ -23,6 +23,9 @@ public class DimAtividadeDTO {
     
     @Schema(description = "Descrição da atividade", example = "Implementar sistema de login com JWT")
     private String descricao;
+
+    @Schema(description = "ID da atividade no JIRA", example = "0123456")
+    private String atividade_jira_id;
     
     @Schema(description = "Se a atividade está ativa", example = "true")
     private Boolean ativo;
