@@ -6,12 +6,16 @@ import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimAtividadeDTO;
 import com.neohorizon.api.entity.dimensao.DimAtividade;
+import com.neohorizon.api.exception.BusinessException;
+import com.neohorizon.api.exception.EntityNotFoundException;
 import com.neohorizon.api.mapper.DimensionMapper;
 import com.neohorizon.api.repository.dimensao.DimAtividadeRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 @Service
 public class DimAtividadeService {
 
+    private static final String ENTITY_NAME = "DimAtividade";
     private final DimAtividadeRepository dimAtividadeRepository;
     private final DimensionMapper dimensionMapper;
 
@@ -27,19 +31,29 @@ public class DimAtividadeService {
     }
 
     public DimAtividadeDTO findById(Long id) {
-        DimAtividade entity = dimAtividadeRepository.findById(id).orElse(null);
-        return entity != null ? dimensionMapper.atividadeToDTO(entity) : null;
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        DimAtividade entity = dimAtividadeRepository.findById(id)
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+        return dimensionMapper.atividadeToDTO(entity);
     }
 
     public DimAtividadeDTO save(DimAtividadeDTO dto) {
+        ValidationUtils.requireNonNull(dto, ENTITY_NAME + " é obrigatório");
+        validateDimAtividadeDTO(dto);
+        
         DimAtividade entity = dimensionMapper.dtoToAtividade(dto);
         DimAtividade savedEntity = dimAtividadeRepository.save(entity);
         return dimensionMapper.atividadeToDTO(savedEntity);
     }
 
     public DimAtividadeDTO update(Long id, DimAtividadeDTO dto) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(dto, ENTITY_NAME + " é obrigatório para atualização");
+        validateDimAtividadeDTO(dto);
+        
         DimAtividade existingEntity = dimAtividadeRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("DimAtividade com ID " + id + " não encontrado."));
+            .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
         existingEntity.setNome(dto.getNome());
         existingEntity.setDescricao(dto.getDescricao());
         existingEntity.setAtivo(dto.getAtivo());
@@ -49,10 +63,20 @@ public class DimAtividadeService {
 
     // Soft delete - marca como inativo
     public void deleteById(Long id) {
-        DimAtividade entity = dimAtividadeRepository.findById(id).orElse(null);
-        if (entity != null) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        DimAtividade entity = dimAtividadeRepository.findById(id)
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+        
+        try {
             entity.setAtivo(false);
             dimAtividadeRepository.save(entity);
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao desativar " + ENTITY_NAME + ": " + e.getMessage(), e);
         }
+    }
+
+    private void validateDimAtividadeDTO(DimAtividadeDTO dto) {
+        ValidationUtils.requireNonEmpty(dto.getNome(), "Nome");
     }
 }

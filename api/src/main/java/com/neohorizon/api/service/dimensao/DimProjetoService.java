@@ -8,12 +8,16 @@ import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.dimensao.DimProjetoDTO;
 import com.neohorizon.api.entity.dimensao.DimProjeto;
+import com.neohorizon.api.exception.BusinessException;
+import com.neohorizon.api.exception.EntityNotFoundException;
 import com.neohorizon.api.mapper.DimensionMapper;
 import com.neohorizon.api.repository.dimensao.DimProjetoRepository;
+import com.neohorizon.api.utils.ValidationUtils;
 
 @Service
 public class DimProjetoService {
 
+    private static final String ENTITY_NAME = "DimProjeto";
     private final DimProjetoRepository dimProjetoRepository;
     private final DimensionMapper dimensionMapper;
 
@@ -31,20 +35,29 @@ public class DimProjetoService {
     }
 
     public DimProjetoDTO findById(Long id) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
         return dimProjetoRepository.findById(id)
                 .map(dimensionMapper::projetoToDTO)
-                .orElse(null);
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
     public DimProjetoDTO save(DimProjetoDTO dimProjetoDTO) {
+        ValidationUtils.requireNonNull(dimProjetoDTO, ENTITY_NAME + " é obrigatório");
+        validateDimProjetoDTO(dimProjetoDTO);
+        
         DimProjeto dimProjeto = dimensionMapper.dtoToProjeto(dimProjetoDTO);
         DimProjeto savedEntity = dimProjetoRepository.save(dimProjeto);
         return dimensionMapper.projetoToDTO(savedEntity);
     }
 
     public DimProjetoDTO update(Long id, DimProjetoDTO dimProjetoDTO) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        ValidationUtils.requireNonNull(dimProjetoDTO, ENTITY_NAME + " é obrigatório para atualização");
+        validateDimProjetoDTO(dimProjetoDTO);
+        
         DimProjeto existingEntity = dimProjetoRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("DimProjeto com ID " + id + " não encontrado."));
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
 
         existingEntity.setNome(dimProjetoDTO.getNome());
         existingEntity.setKey(dimProjetoDTO.getKey());
@@ -55,6 +68,22 @@ public class DimProjetoService {
     }
 
     public void deleteById(Long id) {
-        dimProjetoRepository.deleteById(id);
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        
+        if (!dimProjetoRepository.existsById(id)) {
+            throw EntityNotFoundException.forId(ENTITY_NAME, id);
+        }
+        
+        try {
+            dimProjetoRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new BusinessException("Erro ao deletar " + ENTITY_NAME + ": " + e.getMessage(), e);
+        }
+    }
+
+    private void validateDimProjetoDTO(DimProjetoDTO dto) {
+        ValidationUtils.requireNonEmpty(dto.getNome(), "Nome");
+        ValidationUtils.requireNonEmpty(dto.getKey(), "Key");
+        ValidationUtils.requireNonEmpty(dto.getProjeto_jira_id(), "Projeto Jira ID");
     }
 }

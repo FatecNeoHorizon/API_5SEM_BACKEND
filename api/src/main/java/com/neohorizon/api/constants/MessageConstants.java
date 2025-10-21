@@ -15,6 +15,7 @@ public final class MessageConstants {
     public static final String ACTIVITY_PREFIX = "Atividade com ID ";
     public static final String PROJECT_PREFIX = "Projeto com ID ";
     public static final String APPOINTMENT_PREFIX = "Apontamento de horas com ID ";
+    public static final String DIMDEV_PREFIX = "DimDev com ID ";
     
     // Validações
     public static final String DEVELOPER_ID_REQUIRED = "ID do desenvolvedor é obrigatório";
@@ -38,5 +39,9 @@ public final class MessageConstants {
     
     public static String appointmentNotFound(Long id) {
         return APPOINTMENT_PREFIX + id + NOT_FOUND_MASCULINE;
+    }
+
+    public static String dimDevNotFound(Long id) {
+        return DIMDEV_PREFIX + id + NOT_FOUND_MASCULINE;
     }
 }

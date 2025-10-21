@@ -20,5 +20,5 @@ public class DimDevDTO {
     private String nome;
       
     @Schema(description = "Custo por hora em reais", example = "120.00")
-    private java.math.BigDecimal custo_hora;
+    private java.math.BigDecimal custoHora;
 }
