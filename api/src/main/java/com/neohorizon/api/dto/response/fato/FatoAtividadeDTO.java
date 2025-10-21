@@ -2,7 +2,6 @@ package com.neohorizon.api.dto.response.fato;
 
 import java.math.BigDecimal;
 
-import com.neohorizon.api.dto.response.dimensao.DimAtividadeDTO;
 import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
 import com.neohorizon.api.dto.response.dimensao.DimProjetoDTO;
 import com.neohorizon.api.dto.response.dimensao.DimStatusDTO;
@@ -19,7 +18,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FatoAtividadeDTO {
     private Long id;
-    private DimAtividadeDTO dimAtividade;
     private DimProjetoDTO dimProjeto;
     private DimPeriodoDTO dimPeriodo;
     private DimStatusDTO dimStatus;
