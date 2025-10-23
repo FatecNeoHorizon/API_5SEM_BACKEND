@@ -8,9 +8,18 @@ import org.springframework.stereotype.Service;
 import com.neohorizon.api.dto.metrica.AtividadeAggregationDTO;
 import com.neohorizon.api.dto.metrica.ProjectAtividadeCountDTO;
 import com.neohorizon.api.dto.response.fato.FatoAtividadeDTO;
+import com.neohorizon.api.entity.dimensao.DimPeriodo;
+import com.neohorizon.api.entity.dimensao.DimProjeto;
+import com.neohorizon.api.entity.dimensao.DimStatus;
+import com.neohorizon.api.entity.dimensao.DimTipo;
 import com.neohorizon.api.entity.fato.FatoAtividade;
 import com.neohorizon.api.enums.AggregationType;
+import com.neohorizon.api.mapper.DimensionMapper;
 import com.neohorizon.api.mapper.FatoMapper;
+import com.neohorizon.api.repository.dimensao.DimPeriodoRepository;
+import com.neohorizon.api.repository.dimensao.DimProjetoRepository;
+import com.neohorizon.api.repository.dimensao.DimStatusRepository;
+import com.neohorizon.api.repository.dimensao.DimTipoRepository;
 import com.neohorizon.api.repository.fato.FatoAtividadeRepository;
 import com.neohorizon.api.utils.ConvertStringToInteger;
 
@@ -19,10 +28,26 @@ public class FatoAtividadeService {
 
     private final FatoAtividadeRepository fatoAtividadeRepository;
     private final FatoMapper fatoMapper;
+    private final DimProjetoRepository dimProjetoRepository;
+    private final DimPeriodoRepository dimPeriodoRepository;
+    private final DimStatusRepository dimStatusRepository;
+    private final DimTipoRepository dimTipoRepository;
+    private final DimensionMapper dimensionMapper;
 
-    public FatoAtividadeService(FatoAtividadeRepository fatoAtividadeRepository, FatoMapper fatoMapper) {
+    public FatoAtividadeService(FatoAtividadeRepository fatoAtividadeRepository,
+            FatoMapper fatoMapper,
+            DimProjetoRepository dimProjetoRepository,
+            DimPeriodoRepository dimPeriodoRepository,
+            DimStatusRepository dimStatusRepository,
+            DimTipoRepository dimTipoRepository,
+            DimensionMapper dimensionMapper) {
         this.fatoAtividadeRepository = fatoAtividadeRepository;
         this.fatoMapper = fatoMapper;
+        this.dimProjetoRepository = dimProjetoRepository;
+        this.dimPeriodoRepository = dimPeriodoRepository;
+        this.dimStatusRepository = dimStatusRepository;
+        this.dimTipoRepository = dimTipoRepository;
+        this.dimensionMapper = dimensionMapper;
     }
 
     public List<FatoAtividadeDTO> getAllEntities() {
@@ -40,7 +65,40 @@ public class FatoAtividadeService {
     }
 
     public FatoAtividadeDTO save(FatoAtividadeDTO fatoAtividadeDTO) {
+        if (fatoAtividadeDTO.getDimProjeto() == null || fatoAtividadeDTO.getDimProjeto().getId() == null) {
+            throw new IllegalArgumentException("DimProjeto id is required");
+        }
+        if (fatoAtividadeDTO.getDimPeriodo() == null || fatoAtividadeDTO.getDimPeriodo().getId() == null) {
+            throw new IllegalArgumentException("DimPeriodo id is required");
+        }
+        if (fatoAtividadeDTO.getDimStatus() == null || fatoAtividadeDTO.getDimStatus().getId() == null) {
+            throw new IllegalArgumentException("DimStatus id is required");
+        }
+        if (fatoAtividadeDTO.getDimTipo() == null || fatoAtividadeDTO.getDimTipo().getId() == null) {
+            throw new IllegalArgumentException("DimTipo id is required");
+        }
+
+        Long projetoId = fatoAtividadeDTO.getDimProjeto().getId();
+        Long periodoId = fatoAtividadeDTO.getDimPeriodo().getId();
+        Long statusId = fatoAtividadeDTO.getDimStatus().getId();
+        Long tipoId = fatoAtividadeDTO.getDimTipo().getId();
+
+
+        DimProjeto projeto = dimProjetoRepository.findById(projetoId)
+            .orElseGet(() -> dimensionMapper.dtoToProjeto(fatoAtividadeDTO.getDimProjeto()));
+        DimPeriodo periodo = dimPeriodoRepository.findById(periodoId)
+            .orElseGet(() -> dimensionMapper.dtoToPeriodo(fatoAtividadeDTO.getDimPeriodo()));
+        DimStatus status = dimStatusRepository.findById(statusId)
+            .orElseGet(() -> dimensionMapper.dtoToStatus(fatoAtividadeDTO.getDimStatus()));
+        DimTipo tipo = dimTipoRepository.findById(tipoId)
+            .orElseGet(() -> dimensionMapper.dtoToTipo(fatoAtividadeDTO.getDimTipo()));
+
         FatoAtividade fatoAtividade = fatoMapper.dtoToFatoAtividade(fatoAtividadeDTO);
+        fatoAtividade.setDimProjeto(projeto);
+        fatoAtividade.setDimPeriodo(periodo);
+        fatoAtividade.setDimStatus(status);
+        fatoAtividade.setDimTipo(tipo);
+
         FatoAtividade savedEntity = fatoAtividadeRepository.save(fatoAtividade);
         return fatoMapper.fatoAtividadeToDTO(savedEntity);
     }
