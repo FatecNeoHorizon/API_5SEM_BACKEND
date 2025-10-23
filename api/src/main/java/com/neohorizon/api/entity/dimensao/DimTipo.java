@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Entity
 @Table(name = "dim_tipo")
@@ -25,7 +24,6 @@ public class DimTipo {
     @Column(name = "tipo_id")
     private Long id;
 
-    @NonNull
     @Column(name = "tipo_nome")
     private String nome;
 

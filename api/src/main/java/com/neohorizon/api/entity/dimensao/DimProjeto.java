@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Entity
 @Table(name = "dim_projeto")
@@ -25,11 +24,9 @@ public class DimProjeto {
     @Column(name = "projeto_id")
     private Long id;
 
-    @NonNull
     @Column(name = "projeto_nome")
     private String nome;
 
-    @NonNull
     @Column(name = "projeto_key", unique = true)
     private String key;
 
