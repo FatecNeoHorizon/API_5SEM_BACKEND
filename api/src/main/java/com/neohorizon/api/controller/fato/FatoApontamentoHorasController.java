@@ -3,7 +3,6 @@ package com.neohorizon.api.controller.fato;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +25,6 @@ public class FatoApontamentoHorasController extends BaseController {
 
     private final FatoApontamentoHorasService fatoApontamentoHorasService;
 
-    @Autowired
     public FatoApontamentoHorasController(FatoApontamentoHorasService fatoApontamentoHorasService) {
         this.fatoApontamentoHorasService = fatoApontamentoHorasService;
     }
