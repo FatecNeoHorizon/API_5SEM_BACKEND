@@ -2,7 +2,6 @@ package com.neohorizon.api.controller.fato;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,6 @@ public class FatoAtividadeController extends BaseController {
 
     private final FatoAtividadeService fatoAtividadeService;
 
-    @Autowired
     public FatoAtividadeController(FatoAtividadeService fatoAtividadeService) {
         this.fatoAtividadeService = fatoAtividadeService;
     }
@@ -47,7 +45,7 @@ public class FatoAtividadeController extends BaseController {
 
     @PostMapping
     public ResponseEntity<FatoAtividadeDTO> addFatoAtividade(@RequestBody FatoAtividadeDTO fatoAtividadeDTO) {
-        FatoAtividadeDTO createdEntity = fatoAtividadeService.save(fatoAtividadeDTO);
+        FatoAtividadeDTO createdEntity = fatoAtividadeService.create(fatoAtividadeDTO);
         return created(createdEntity);
     }
 
@@ -86,7 +84,6 @@ public class FatoAtividadeController extends BaseController {
             @RequestParam(value = "from", required = false) String from,
             @RequestParam(value = "to", required = false) String to) {
 
-        // Prioriza dataInicio/dataFim, senão usa from/to
         String start = dataInicio != null ? dataInicio : from;
         String end = dataFim != null ? dataFim : to;
 
