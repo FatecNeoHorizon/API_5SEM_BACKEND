@@ -22,10 +22,13 @@ import com.neohorizon.api.repository.dimensao.DimStatusRepository;
 import com.neohorizon.api.repository.dimensao.DimTipoRepository;
 import com.neohorizon.api.repository.fato.FatoAtividadeRepository;
 import com.neohorizon.api.utils.ConvertStringToInteger;
+import static com.neohorizon.api.utils.ValidationUtils.requireValidId;
+import static com.neohorizon.api.utils.ValidationUtils.validateFatoAtividade;
 
 @Service
 public class FatoAtividadeService {
 
+    private static final String ENTITY_NAME = "FatoAtividade";
     private final FatoAtividadeRepository fatoAtividadeRepository;
     private final FatoMapper fatoMapper;
     private final DimProjetoRepository dimProjetoRepository;
@@ -59,24 +62,15 @@ public class FatoAtividadeService {
     }
 
     public FatoAtividadeDTO findById(Long id) {
+        requireValidId(id, ENTITY_NAME);
+        
         return fatoAtividadeRepository.findById(id)
                 .map(fatoMapper::fatoAtividadeToDTO)
                 .orElse(null);
     }
 
-    public FatoAtividadeDTO save(FatoAtividadeDTO fatoAtividadeDTO) {
-        if (fatoAtividadeDTO.getDimProjeto() == null || fatoAtividadeDTO.getDimProjeto().getId() == null) {
-            throw new IllegalArgumentException("DimProjeto id is required");
-        }
-        if (fatoAtividadeDTO.getDimPeriodo() == null || fatoAtividadeDTO.getDimPeriodo().getId() == null) {
-            throw new IllegalArgumentException("DimPeriodo id is required");
-        }
-        if (fatoAtividadeDTO.getDimStatus() == null || fatoAtividadeDTO.getDimStatus().getId() == null) {
-            throw new IllegalArgumentException("DimStatus id is required");
-        }
-        if (fatoAtividadeDTO.getDimTipo() == null || fatoAtividadeDTO.getDimTipo().getId() == null) {
-            throw new IllegalArgumentException("DimTipo id is required");
-        }
+    public FatoAtividadeDTO create(FatoAtividadeDTO fatoAtividadeDTO) {
+        validateFatoAtividade(fatoAtividadeDTO);
 
         Long projetoId = fatoAtividadeDTO.getDimProjeto().getId();
         Long periodoId = fatoAtividadeDTO.getDimPeriodo().getId();
@@ -138,14 +132,14 @@ public class FatoAtividadeService {
         AggregationType periodoEnum = AggregationType.fromString(periodo);
 
         AtividadeAggregationDTO periodoBuscado = new AtividadeAggregationDTO();
-        periodoBuscado.setAnoInicio(dataInicioInteger[0]); // parts[0] é o ano
-        periodoBuscado.setMesInicio(dataInicioInteger[1]); // parts[1] é o mês
-        periodoBuscado.setDiaInicio(dataInicioInteger[2]); // parts[2] é o dia
+        periodoBuscado.setAnoInicio(dataInicioInteger[0]);
+        periodoBuscado.setMesInicio(dataInicioInteger[1]);
+        periodoBuscado.setDiaInicio(dataInicioInteger[2]);
 
-        periodoBuscado.setAnoFim(dataFimInteger[0]);    // parts[0] é o ano
-        periodoBuscado.setMesFim(dataFimInteger[1]);    // parts[1] é o mês
-        periodoBuscado.setDiaFim(dataFimInteger[2]);    // parts[2] é o dia
-    
+        periodoBuscado.setAnoFim(dataFimInteger[0]);
+        periodoBuscado.setMesFim(dataFimInteger[1]);
+        periodoBuscado.setDiaFim(dataFimInteger[2]);
+
         periodoBuscado.setPeriodo(periodoEnum);
 
         return fatoAtividadeRepository.findAtividadesByPeriod(periodoBuscado);
