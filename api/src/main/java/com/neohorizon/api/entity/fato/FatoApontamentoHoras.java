@@ -56,10 +56,10 @@ public class FatoApontamentoHoras {
     @JoinColumn(name = "projeto_id", nullable = false)
     private DimProjeto dimProjeto;
 
-    @Column(name = "horas_trabalhadas", nullable = false)
+    @Column(name = "horas_trabalhadas")
     private Double horasTrabalhadas;
 
-    @Column(name = "descricao_trabalho", length = 500)
+    @Column(name = "descricao_trabalho")
     private String descricaoTrabalho;
 
     @Column(name = "data_criacao", nullable = false)

@@ -58,7 +58,6 @@ public class FatoApontamentoHorasService {
     @Transactional
     public FatoApontamentoHorasDTO create(FatoApontamentoHorasDTO dto) {
         ValidationUtils.requireNonNull(dto, ENTITY_NAME + " é obrigatório");
-        validateFatoApontamentoHorasDTO(dto);
         
         FatoApontamentoHoras entity = fatoMapper.dtoToFatoApontamento(dto);
         entity = fatoApontamentoHorasRepository.save(entity);
@@ -104,13 +103,5 @@ public class FatoApontamentoHorasService {
         }
         
         fatoApontamentoHorasRepository.deleteById(id);
-    }
-
-    private void validateFatoApontamentoHorasDTO(FatoApontamentoHorasDTO dto) {
-        ValidationUtils.requireNonNull(dto.getHorasTrabalhadas(), "Horas trabalhadas");
-        ValidationUtils.require(
-            dto.getHorasTrabalhadas() > 0, 
-            "Horas trabalhadas deve ser maior que zero"
-        );
     }
 }
