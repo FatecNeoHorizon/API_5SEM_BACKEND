@@ -3,7 +3,6 @@ package com.neohorizon.api.controller.fato;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,31 +30,29 @@ import com.neohorizon.api.service.fato.FatoCustoHoraService;
 public class FatoCustoHoraController extends BaseController {
 
     private final FatoCustoHoraService service;
-
-    @Autowired
     public FatoCustoHoraController(FatoCustoHoraService service) {
         this.service = service;
     }
 
     @GetMapping("/total")
-    public ResponseEntity<CustoTotalDTO> getTotalGeral() {
-        return ok(service.obterTotalGeral());
+    public ResponseEntity<CustoTotalDTO> getTotal() {
+        return ok(service.obteinTotal());
     }
 
     @GetMapping("/total-por-projeto")
-    public ResponseEntity<List<CustoPorProjetoDTO>> getTotalPorProjeto() {
-        return ok(service.obterTotalPorProjeto());
+    public ResponseEntity<List<CustoPorProjetoDTO>> getTotalByProject() {
+        return ok(service.obteinTotalByProject());
     }
 
     @GetMapping("/por-dev")
-    public ResponseEntity<List<CustoHorasPorDevDTO>> getTotalPorDev() {
-        return ok(service.obterTotalPorDev());
+    public ResponseEntity<List<CustoHorasPorDevDTO>> getTotalByDev() {
+        return ok(service.obteinTotalByDev());
     }
 
     @GetMapping("/evolucao")
-    public ResponseEntity<List<EvolucaoCustoDTO>> getEvolucao(
+    public ResponseEntity<List<EvolucaoCustoDTO>> getEvolution(
             @RequestParam(defaultValue = "mes") String granularidade) {
-        return ok(service.obterEvolucao(granularidade));
+        return ok(service.obteinEvolution(granularidade));
     }
 
     @GetMapping("/filter")
@@ -104,8 +101,8 @@ public class FatoCustoHoraController extends BaseController {
     }
 
     @PostMapping
-    public ResponseEntity<FatoCustoHoraDTO> addFatoCustoHora(@RequestBody FatoCustoHoraDTO fatoCustoHoraDTO) {
-        FatoCustoHoraDTO createdEntity = service.save(fatoCustoHoraDTO);
+    public ResponseEntity<FatoCustoHoraDTO> create(@RequestBody FatoCustoHoraDTO fatoCustoHoraDTO) {
+        FatoCustoHoraDTO createdEntity = service.create(fatoCustoHoraDTO);
         return created(createdEntity);
     }
 
