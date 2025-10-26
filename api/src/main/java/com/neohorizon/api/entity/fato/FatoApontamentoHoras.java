@@ -6,6 +6,7 @@ import com.neohorizon.api.entity.dimensao.DimAtividade;
 import com.neohorizon.api.entity.dimensao.DimDev;
 import com.neohorizon.api.entity.dimensao.DimPeriodo;
 import com.neohorizon.api.entity.dimensao.DimProjeto;
+import com.neohorizon.api.entity.dimensao.DimTipo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -51,6 +52,10 @@ public class FatoApontamentoHoras {
     @ManyToOne
     @JoinColumn(name = "atividade_id", nullable = false)
     private DimAtividade dimAtividade;
+
+    @ManyToOne
+    @JoinColumn(name = "tipo_id", nullable = false)
+    private DimTipo dimTipo;
 
     @ManyToOne
     @JoinColumn(name = "projeto_id", nullable = false)
