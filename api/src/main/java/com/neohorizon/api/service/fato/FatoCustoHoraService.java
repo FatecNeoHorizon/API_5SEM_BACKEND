@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.fato.FatoCustoHoraDTO;
@@ -26,83 +25,70 @@ public class FatoCustoHoraService {
     private final FatoCustoHoraRepository repo;
     private final FatoMapper fatoMapper;
 
-    @Autowired
     public FatoCustoHoraService(FatoCustoHoraRepository repo, FatoMapper fatoMapper) {
         this.repo = repo;
         this.fatoMapper = fatoMapper;
     }
 
-    public CustoTotalDTO obterTotalGeral() {
+    public CustoTotalDTO obteinTotal() {
         return new CustoTotalDTO(repo.totalGeral());
     }
 
-    public List<CustoPorProjetoDTO> obterTotalPorProjeto() {
-        // OTIMIZAÇÃO: Usar parallelStream() + method reference para conversão eficiente
+    public List<CustoPorProjetoDTO> obteinTotalByProject() {
         return repo.totalPorProjetoRaw().parallelStream()
-                .map(this::convertToCustoPorProjetoDTO)
+                .map(this::convertToCostByProjetDTO)
                 .toList();
     }
 
-    public List<CustoHorasPorDevDTO> obterTotalPorDev() {
-        // OTIMIZAÇÃO: Usar parallelStream() + method reference para conversão eficiente
+    public List<CustoHorasPorDevDTO> obteinTotalByDev() {
         return repo.totalPorDevRaw().parallelStream()
-                .map(this::convertToCustoHorasPorDevDTO)
+                .map(this::convertToCostHourByDevDTO)
                 .toList();
     }
 
-    /**
-     * OTIMIZAÇÃO: Method reference para evitar lambda repetitivo
-     */
-    private CustoPorProjetoDTO convertToCustoPorProjetoDTO(Object[] row) {
+    private CustoPorProjetoDTO convertToCostByProjetDTO(Object[] row) {
         return new CustoPorProjetoDTO((Long) row[0], (String) row[1], nz((Number) row[2]));
     }
 
-    /**
-     * OTIMIZAÇÃO: Method reference para evitar lambda repetitivo  
-     */
-    private CustoHorasPorDevDTO convertToCustoHorasPorDevDTO(Object[] row) {
+    private CustoHorasPorDevDTO convertToCostHourByDevDTO(Object[] row) {
         return new CustoHorasPorDevDTO((Long) row[0], (String) row[1], nz((Number) row[2]), nz((Number) row[3]));
     }
 
-    public List<EvolucaoCustoDTO> obterEvolucao(String granularidade) {
+    public List<EvolucaoCustoDTO> obteinEvolution(String granularidade) {
         String g = (granularidade == null || granularidade.isBlank()) ? "mes" : granularidade.toLowerCase(Locale.ROOT);
         
-        // OTIMIZAÇÃO: Usar parallelStream() + method references
         return switch (g) {
             case "ano" -> repo.evolucaoAnoRaw().parallelStream()
-                    .map(this::convertToEvolucaoAno)
+                    .map(this::convertToYearEvolution)
                     .toList();
             case "semana" -> repo.evolucaoSemanaRaw().parallelStream()
-                    .map(this::convertToEvolucaoSemana)
+                    .map(this::convertToWeekEvolution)
                     .toList();
             case "dia" -> repo.evolucaoDiaRaw().parallelStream()
-                    .map(this::convertToEvolucaoDia)
+                    .map(this::convertToDayEvolution)
                     .toList();
             default -> repo.evolucaoMesRaw().parallelStream()
-                    .map(this::convertToEvolucaoMes)
+                    .map(this::convertToMonthEvolution)
                     .toList();
         };
     }
 
-    /**
-     * OTIMIZAÇÃO: Method references para conversões específicas
-     */
-    private EvolucaoCustoDTO convertToEvolucaoAno(Object[] row) {
+    private EvolucaoCustoDTO convertToYearEvolution(Object[] row) {
         return new EvolucaoCustoDTO(String.valueOf((Integer) row[0]), nz((Number) row[1]));
     }
 
-    private EvolucaoCustoDTO convertToEvolucaoSemana(Object[] row) {
+    private EvolucaoCustoDTO convertToWeekEvolution(Object[] row) {
         return new EvolucaoCustoDTO(((Integer) row[0]) + "-S" + ((Integer) row[1]), nz((Number) row[2]));
     }
 
-    private EvolucaoCustoDTO convertToEvolucaoDia(Object[] row) {
+    private EvolucaoCustoDTO convertToDayEvolution(Object[] row) {
         return new EvolucaoCustoDTO(
                 String.format("%04d-%02d-%02d", (Integer) row[0], (Integer) row[1], (Integer) row[2]),
                 nz((Number) row[3])
         );
     }
 
-    private EvolucaoCustoDTO convertToEvolucaoMes(Object[] row) {
+    private EvolucaoCustoDTO convertToMonthEvolution(Object[] row) {
         return new EvolucaoCustoDTO(
                 monthLabel((Integer) row[1]) + "/" + ((Integer) row[0]),
                 nz((Number) row[2])
@@ -132,7 +118,7 @@ public class FatoCustoHoraService {
         };
     }
 
-     public List<FatoCustoHoraDTO> getAllEntitiesByFilter(DimProjeto dimProjeto, DimPeriodo dimPeriodo, DimDev dimDev)
+    public List<FatoCustoHoraDTO> getAllEntitiesByFilter(DimProjeto dimProjeto, DimPeriodo dimPeriodo, DimDev dimDev)
     {
         return repo.findByDimProjetoAndDimPeriodoAndDimDev(dimProjeto, dimPeriodo, dimDev)
                 .parallelStream()
@@ -154,7 +140,7 @@ public class FatoCustoHoraService {
                 .orElse(null);
     }
 
-     public FatoCustoHoraDTO save(FatoCustoHoraDTO fatoCustoHoraDTO) {
+     public FatoCustoHoraDTO create(FatoCustoHoraDTO fatoCustoHoraDTO) {
         FatoCustoHora fatoCustoHora = fatoMapper.dtoToCustoHora(fatoCustoHoraDTO);
         FatoCustoHora savedEntity = repo.save(fatoCustoHora);
         return fatoMapper.custoHoraToDTO(savedEntity);
