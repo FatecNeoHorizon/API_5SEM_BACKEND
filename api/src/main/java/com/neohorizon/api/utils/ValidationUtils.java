@@ -28,19 +28,9 @@ public final class ValidationUtils {
            throw new IllegalArgumentException("Dimensão Projeto é obrigatória");
         }
 
-        if (dto.getHorasTrabalhadas() == null || dto.getHorasTrabalhadas() <= 0) {
-           throw new IllegalArgumentException("Horas trabalhadas deve ser maior que zero");
-        }
-
         if (dto.getDescricaoTrabalho() == null || dto.getDescricaoTrabalho().isBlank()) {
            throw new IllegalArgumentException("Descrição do trabalho é obrigatória");
         }
-
-        requireNonNull(dto.getHorasTrabalhadas(), "Horas trabalhadas");
-        require(
-            dto.getHorasTrabalhadas() > 0,
-            "Horas trabalhadas deve ser maior que zero"
-        );
     }
 
     public static void validateFatoAtividade(FatoAtividadeDTO fatoAtividadeDTO) {
