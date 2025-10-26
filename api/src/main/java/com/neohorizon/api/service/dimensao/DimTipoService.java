@@ -40,6 +40,13 @@ public class DimTipoService {
                 .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
+    public List<DimTipoDTO> findByNome(String nome) {
+        return dimTipoRepository.findByNome(nome)
+                .parallelStream()
+                .map(dimensionMapper::tipoToDTO)
+                .collect(Collectors.toList());
+    }
+
     public DimTipoDTO save(DimTipoDTO dimTipoDTO) {
         ValidationUtils.requireNonNull(dimTipoDTO, ENTITY_NAME + " é obrigatório");
         validateDimTipoDTO(dimTipoDTO);
