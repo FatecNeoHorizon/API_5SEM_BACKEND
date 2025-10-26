@@ -21,6 +21,7 @@ import com.neohorizon.api.repository.dimensao.DimDevRepository;
 import com.neohorizon.api.repository.dimensao.DimPeriodoRepository;
 import com.neohorizon.api.repository.dimensao.DimProjetoRepository;
 import com.neohorizon.api.repository.fato.FatoApontamentoHorasRepository;
+import com.neohorizon.api.service.fato.FatoCustoHoraService;
 import static com.neohorizon.api.utils.ValidationUtils.require;
 import static com.neohorizon.api.utils.ValidationUtils.requireNonNull;
 import static com.neohorizon.api.utils.ValidationUtils.requireValidId;
@@ -37,6 +38,7 @@ public class FatoApontamentoHorasService {
     private final DimAtividadeRepository dimAtividadeRepository;
     private final DimDevRepository dimDevRepository;
     private final DimensionMapper dimensionMapper;
+    private final FatoCustoHoraService fatoCustoHoraService;
 
     public FatoApontamentoHorasService(
             FatoApontamentoHorasRepository fatoApontamentoHorasRepository,
@@ -45,14 +47,16 @@ public class FatoApontamentoHorasService {
             DimDevRepository dimDevRepository,
             DimAtividadeRepository dimAtividadeRepository,
             DimProjetoRepository dimProjetoRepository,
-            DimensionMapper dimensionMapper) {
-            this.fatoApontamentoHorasRepository = fatoApontamentoHorasRepository;
+            DimensionMapper dimensionMapper,
+            FatoCustoHoraService fatoCustoHoraService) {
+        this.fatoApontamentoHorasRepository = fatoApontamentoHorasRepository;
         this.fatoMapper = fatoMapper;
         this.dimPeriodoRepository = dimPeriodoRepository;
         this.dimProjetoRepository = dimProjetoRepository;
         this.dimAtividadeRepository = dimAtividadeRepository;
         this.dimDevRepository = dimDevRepository;
         this.dimensionMapper = dimensionMapper;
+        this.fatoCustoHoraService = fatoCustoHoraService;
     }
 
     public List<FatoApontamentoHorasDTO> getAllEntities() {
@@ -110,6 +114,12 @@ public class FatoApontamentoHorasService {
         fatoApontamentoHoras.setDimProjeto(projeto);
 
         FatoApontamentoHoras savedEntity = fatoApontamentoHorasRepository.save(fatoApontamentoHoras);
+        try {
+            fatoCustoHoraService.recalcForTriplet(
+                dev.getId(), projeto.getId(), periodo.getId()
+            );
+        } catch (Exception ex) {
+        }
         return fatoMapper.fatoApontamentoToDTO(savedEntity);
     }
 
@@ -121,7 +131,17 @@ public class FatoApontamentoHorasService {
         FatoApontamentoHoras existingEntity = fatoApontamentoHorasRepository.findById(id)
             .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
              
+        existingEntity.setHorasTrabalhadas(dto.getHorasTrabalhadas());
+        existingEntity.setDescricaoTrabalho(dto.getDescricaoTrabalho());
         FatoApontamentoHoras updatedEntity = fatoApontamentoHorasRepository.save(existingEntity);
+        try {
+            fatoCustoHoraService.recalcForTriplet(
+                updatedEntity.getDimDev().getId(),
+                updatedEntity.getDimProjeto().getId(),
+                updatedEntity.getDimPeriodo().getId()
+            );
+        } catch (Exception ex) {
+        }
         return fatoMapper.fatoApontamentoToDTO(updatedEntity);
     }
 

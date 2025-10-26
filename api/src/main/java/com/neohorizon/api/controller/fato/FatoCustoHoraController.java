@@ -1,6 +1,7 @@
 // src/main/java/com/neohorizon/api/controller/FatoCustoHoraController.java
 package com.neohorizon.api.controller.fato;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -117,5 +118,16 @@ public class FatoCustoHoraController extends BaseController {
     public ResponseEntity<Void> deleteFatoCustoHora(@PathVariable Long id) {
         service.deleteById(id);
         return noContent();
+    }
+
+    @PostMapping("/recalcular")
+    public ResponseEntity<Integer> recalc(
+            @RequestParam(name = "data_inicio", required = false) LocalDate dataInicio,
+            @RequestParam(name = "data_fim", required = false) LocalDate dataFim,
+            @RequestParam(name = "dev_id", required = false) Long devId,
+            @RequestParam(name = "projeto_id", required = false) Long projetoId) {
+
+        int affected = service.recalcAndPersist(dataInicio, dataFim, devId, projetoId);
+        return ok(affected);
     }
 }

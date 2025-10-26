@@ -1,10 +1,19 @@
 // src/main/java/com/neohorizon/api/service/FatoCustoHoraService.java
 package com.neohorizon.api.service.fato;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.neohorizon.api.dto.response.fato.FatoCustoHoraDTO;
@@ -16,18 +25,37 @@ import com.neohorizon.api.entity.dimensao.DimDev;
 import com.neohorizon.api.entity.dimensao.DimPeriodo;
 import com.neohorizon.api.entity.dimensao.DimProjeto;
 import com.neohorizon.api.entity.fato.FatoCustoHora;
+import com.neohorizon.api.entity.fato.FatoApontamentoHoras;
 import com.neohorizon.api.mapper.FatoMapper;
+import com.neohorizon.api.repository.fato.FatoApontamentoHorasRepository;
 import com.neohorizon.api.repository.fato.FatoCustoHoraRepository;
+import com.neohorizon.api.repository.dimensao.DimDevRepository;
+import com.neohorizon.api.repository.dimensao.DimPeriodoRepository;
+import com.neohorizon.api.repository.dimensao.DimProjetoRepository;
 
 @Service
 public class FatoCustoHoraService {
 
+    private static final Logger log = LoggerFactory.getLogger(FatoCustoHoraService.class);
+
     private final FatoCustoHoraRepository repo;
     private final FatoMapper fatoMapper;
+    private final FatoApontamentoHorasRepository apontRepo;
+    private final DimProjetoRepository projetoRepo;
+    private final DimPeriodoRepository periodoRepo;
+    private final DimDevRepository devRepo;
 
-    public FatoCustoHoraService(FatoCustoHoraRepository repo, FatoMapper fatoMapper) {
+    public FatoCustoHoraService(FatoCustoHoraRepository repo, FatoMapper fatoMapper,
+                                FatoApontamentoHorasRepository apontRepo,
+                                DimProjetoRepository projetoRepo,
+                                DimPeriodoRepository periodoRepo,
+                                DimDevRepository devRepo) {
         this.repo = repo;
         this.fatoMapper = fatoMapper;
+        this.apontRepo = apontRepo;
+        this.projetoRepo = projetoRepo;
+        this.periodoRepo = periodoRepo;
+        this.devRepo = devRepo;
     }
 
     public CustoTotalDTO obteinTotal() {
@@ -162,5 +190,106 @@ public class FatoCustoHoraService {
 
     public void deleteById(Long id) {
         repo.deleteById(id);
+    }
+
+    public int recalcAndPersist(LocalDate fromDate, LocalDate toDate, Long devId, Long projetoId) {
+        LocalDateTime from = (fromDate != null) ? fromDate.atStartOfDay() : LocalDate.of(1970, 1, 1).atStartOfDay();
+        LocalDateTime to = (toDate != null) ? toDate.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
+
+        Stream<com.neohorizon.api.entity.fato.FatoApontamentoHoras> apontStream;
+        if (devId != null) {
+            apontStream = apontRepo.findByDevAndPeriodo(devId, from, to).stream();
+        } else {
+            apontStream = apontRepo.findByPeriodo(from, to).stream();
+        }
+        if (projetoId != null) {
+            apontStream = apontStream.filter(a -> Objects.equals(a.getDimProjeto().getId(), projetoId));
+        }
+
+        record Key(Long devId, Long projetoId, Long periodoId) {}
+        Map<Key, Double> horasPorChave = new HashMap<>();
+        apontStream.forEach(a -> {
+            Key k = new Key(a.getDimDev().getId(), a.getDimProjeto().getId(), a.getDimPeriodo().getId());
+            horasPorChave.merge(k, a.getHorasTrabalhadas(), Double::sum);
+        });
+
+        int affected = 0;
+        for (Map.Entry<Key, Double> e : horasPorChave.entrySet()) {
+            Key k = e.getKey();
+            Double horasDbl = e.getValue() == null ? 0.0 : e.getValue();
+            BigDecimal horas = BigDecimal.valueOf(horasDbl);
+
+            var dev = devRepo.findById(k.devId()).orElse(null);
+            var projeto = projetoRepo.findById(k.projetoId()).orElse(null);
+            var periodo = periodoRepo.findById(k.periodoId()).orElse(null);
+
+            if (dev == null || projeto == null || periodo == null) {
+                log.warn("Ignorando upsert faltando chave: dev={}, projeto={}, periodo={}", k.devId(), k.projetoId(), k.periodoId());
+                continue;
+            }
+
+            BigDecimal tarifa = dev.getCustoHora() == null ? BigDecimal.ZERO : dev.getCustoHora();
+            BigDecimal custo = tarifa.multiply(horas);
+
+            try {
+                var existentes = repo.findByDimProjetoAndDimPeriodoAndDimDev(projeto, periodo, dev);
+                FatoCustoHora target = existentes == null || existentes.isEmpty() ? FatoCustoHora.builder()
+                        .dimProjeto(projeto)
+                        .dimPeriodo(periodo)
+                        .dimDev(dev)
+                        .build()
+                        : existentes.get(0);
+
+                target.setHorasQuantidade(horas);
+                target.setCusto(custo);
+
+                repo.save(target);
+                affected++;
+                log.info("Upsert custo-hora: dev={} projeto={} periodo={} horas={} custo={}",
+                        dev.getId(), projeto.getId(), periodo.getId(), horas, custo);
+            } catch (Exception ex) {
+                log.error("Falha ao persistir custo-hora: dev={} projeto={} periodo={}: {}",
+                        k.devId(), k.projetoId(), k.periodoId(), ex.getMessage(), ex);
+            }
+        }
+        return affected;
+    }
+
+    public int recalcForTriplet(Long devId, Long projetoId, Long periodoId) {
+        if (devId == null || projetoId == null || periodoId == null) return 0;
+
+        LocalDateTime from = LocalDate.of(1970, 1, 1).atStartOfDay();
+        LocalDateTime to = LocalDate.now().atTime(23, 59, 59);
+        var apont = apontRepo.findByDevAndPeriodo(devId, from, to).stream()
+                .filter(a -> Objects.equals(a.getDimProjeto().getId(), projetoId))
+                .filter(a -> Objects.equals(a.getDimPeriodo().getId(), periodoId))
+                .toList();
+
+        if (apont.isEmpty()) return 0;
+
+        double totalHoras = apont.stream().mapToDouble(FatoApontamentoHoras::getHorasTrabalhadas).sum();
+        var dev = devRepo.findById(devId).orElse(null);
+        var projeto = projetoRepo.findById(projetoId).orElse(null);
+        var periodo = periodoRepo.findById(periodoId).orElse(null);
+        if (dev == null || projeto == null || periodo == null) return 0;
+
+        BigDecimal horas = BigDecimal.valueOf(totalHoras);
+        BigDecimal tarifa = dev.getCustoHora() == null ? BigDecimal.ZERO : dev.getCustoHora();
+        BigDecimal custo = tarifa.multiply(horas);
+
+        var existentes = repo.findByDimProjetoAndDimPeriodoAndDimDev(projeto, periodo, dev);
+        FatoCustoHora target = existentes == null || existentes.isEmpty() ? FatoCustoHora.builder()
+                .dimProjeto(projeto)
+                .dimPeriodo(periodo)
+                .dimDev(dev)
+                .build()
+                : existentes.get(0);
+
+        target.setHorasQuantidade(horas);
+        target.setCusto(custo);
+        repo.save(target);
+        log.info("Upsert (triplo) custo-hora: dev={} projeto={} periodo={} horas={} custo={}",
+                devId, projetoId, periodoId, horas, custo);
+        return 1;
     }
 }

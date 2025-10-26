@@ -85,7 +85,7 @@ public class DevHoursMetricsService {
             atividadeCache.putIfAbsent(atividadeId, apontamento.getDimAtividade());
     
             DevHoursMetricsDTO.DiaHorasDTO diaDTO = DevHoursMetricsDTO.DiaHorasDTO.builder()
-                .data(apontamento.getDataAtualizacao().toLocalDate())
+                .data((apontamento.getDataAtualizacao() != null ? apontamento.getDataAtualizacao() : apontamento.getDataCriacao()).toLocalDate())
                 .horas(horas)
                 .descricaoTrabalho(apontamento.getDescricaoTrabalho())
                 .build();
@@ -98,16 +98,17 @@ public class DevHoursMetricsService {
                 Long atividadeId = entry.getKey();
                 List<DevHoursMetricsDTO.DiaHorasDTO> dias = entry.getValue();
                 DimAtividade atividade = atividadeCache.get(atividadeId);
-    
+
                 String atividadeNome = atividade != null ? atividade.getNome() : "Atividade desconhecida";
                 Double totalHoras = horasPorAtividade.get(atividadeId);
                 if (totalHoras == null) {
                     totalHoras = 0.0;
                 }
-    
+
                 return DevHoursMetricsDTO.AtividadeHorasDTO.builder()
                     .atividadeId(atividadeId)
                     .atividadeNome(atividadeNome)
+                    .projetoNome((devApontamentos.get(0).getDimProjeto() != null) ? devApontamentos.get(0).getDimProjeto().getNome() : null)
                     .totalHoras(totalHoras)
                     .diasApontamentos(dias)
                     .build();

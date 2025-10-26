@@ -10,6 +10,7 @@ import com.neohorizon.api.exception.BusinessException;
 import com.neohorizon.api.exception.EntityNotFoundException;
 import com.neohorizon.api.mapper.DimensionMapper;
 import com.neohorizon.api.repository.dimensao.DimDevRepository;
+import com.neohorizon.api.service.fato.FatoCustoHoraService;
 import com.neohorizon.api.utils.ValidationUtils;
 
 @Service
@@ -18,10 +19,13 @@ public class DimDevService {
     private static final String ENTITY_NAME = "DimDev";
     private final DimDevRepository dimDevRepository;
     private final DimensionMapper dimensionMapper;
+    private final FatoCustoHoraService fatoCustoHoraService;
 
-    public DimDevService(DimDevRepository dimDevRepository, DimensionMapper dimensionMapper) {
+    public DimDevService(DimDevRepository dimDevRepository, DimensionMapper dimensionMapper,
+                         FatoCustoHoraService fatoCustoHoraService) {
         this.dimDevRepository = dimDevRepository;
         this.dimensionMapper = dimensionMapper;
+        this.fatoCustoHoraService = fatoCustoHoraService;
     }
 
     public DimDevDTO getById(Long id) {
@@ -57,6 +61,10 @@ public class DimDevService {
                     existingEntity.setNome(dimDevDTO.getNome());
                     existingEntity.setCustoHora(dimDevDTO.getCustoHora());
                     DimDev updatedEntity = dimDevRepository.save(existingEntity);
+                    try {
+                        fatoCustoHoraService.recalcAndPersist(null, null, id, null);
+                    } catch (Exception ex) {
+                    }
                     return dimensionMapper.devToDTO(updatedEntity);
                 })
                 .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
