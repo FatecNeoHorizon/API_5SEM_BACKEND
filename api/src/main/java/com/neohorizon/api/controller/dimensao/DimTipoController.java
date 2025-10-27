@@ -42,6 +42,12 @@ public class DimTipoController extends BaseController {
         }
         return ok(dimTipoDTO);
     }
+    
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<List<DimTipoDTO>> getDimTipoByNome(@PathVariable String nome) {
+        List<DimTipoDTO> dimTipoDTOs = dimTipoService.findByNome(nome);
+        return ok(dimTipoDTOs);
+    }
 
     @PostMapping
     public ResponseEntity<DimTipoDTO> addDimTipo(@RequestBody DimTipoDTO dimTipoDTO) {

@@ -18,6 +18,7 @@ public interface FatoMapper {
     // Fato Apontamento Horas
     @Mapping(source = "dimDev", target = "dimDev")
     @Mapping(source = "dimAtividade", target = "dimAtividade")
+    @Mapping(source = "dimTipo", target = "dimTipo")
     @Mapping(source = "dimProjeto", target = "dimProjeto")
     @Mapping(source = "dimPeriodo", target = "dimPeriodo")
     @Mapping(source = "horasTrabalhadas", target = "horasTrabalhadas")
@@ -28,6 +29,7 @@ public interface FatoMapper {
     
     @Mapping(source = "dimDev", target = "dimDev")
     @Mapping(source = "dimAtividade", target = "dimAtividade")
+    @Mapping(source = "dimTipo", target = "dimTipo")
     @Mapping(source = "dimProjeto", target = "dimProjeto")
     @Mapping(source = "dimPeriodo", target = "dimPeriodo")
     @Mapping(source = "horasTrabalhadas", target = "horasTrabalhadas")

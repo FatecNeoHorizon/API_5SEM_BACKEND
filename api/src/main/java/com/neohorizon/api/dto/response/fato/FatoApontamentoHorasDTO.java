@@ -7,6 +7,7 @@ import com.neohorizon.api.dto.response.dimensao.DimAtividadeDTO;
 import com.neohorizon.api.dto.response.dimensao.DimDevDTO;
 import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
 import com.neohorizon.api.dto.response.dimensao.DimProjetoDTO;
+import com.neohorizon.api.dto.response.dimensao.DimTipoDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +24,7 @@ public class FatoApontamentoHorasDTO {
     private DimPeriodoDTO dimPeriodo;
     private DimDevDTO dimDev;
     private DimAtividadeDTO dimAtividade;
+    private DimTipoDTO dimTipo;
     private DimProjetoDTO dimProjeto;
     private Double horasTrabalhadas;
     private String descricaoTrabalho;
