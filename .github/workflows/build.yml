@@ -37,8 +37,8 @@ jobs:
 
       - name: Build and analyze with SonarCloud
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # fornecido automaticamente pelo GitHub
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}    # você cria no SonarCloud e adiciona nos secrets
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd api
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
