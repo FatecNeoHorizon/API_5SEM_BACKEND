@@ -16,11 +16,13 @@ public final class MessageConstants {
     public static final String PROJECT_PREFIX = "Projeto com ID ";
     public static final String APPOINTMENT_PREFIX = "Apontamento de horas com ID ";
     public static final String DIMDEV_PREFIX = "DimDev com ID ";
+    public static final String USER_PREFIX = "Usuário com ID : ";
     
     // Validações
     public static final String DEVELOPER_ID_REQUIRED = "ID do desenvolvedor é obrigatório";
     public static final String ACTIVITY_ID_REQUIRED = "ID da atividade é obrigatório";
     public static final String PROJECT_ID_REQUIRED = "ID do projeto é obrigatório";
+    public static final String USER_ID_REQUIRED = "ID do usuário é obrigatório";
     public static final String DATE_REQUIRED = "Data do apontamento é obrigatória";
     public static final String HOURS_INVALID = "Horas trabalhadas deve ser maior que zero";
     
@@ -43,5 +45,9 @@ public final class MessageConstants {
 
     public static String dimDevNotFound(Long id) {
         return DIMDEV_PREFIX + id + NOT_FOUND_MASCULINE;
+    }
+
+    public static String userIdRequired() {
+        return USER_ID_REQUIRED;
     }
 }
