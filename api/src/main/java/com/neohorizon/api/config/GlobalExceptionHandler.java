@@ -13,7 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@ControllerAdvice(basePackages = "com.neohorizon.api")
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
