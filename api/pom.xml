@@ -196,6 +196,21 @@
 					</rules>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version> 
+				<configuration>
+					<!-- List of test classes to exclude from the test run -->
+					<!-- <excludes>
+						<exclude>ConvertStringToIntegerTest.java</exclude> 
+					</excludes> -->
+					<!-- List of test classes to include in the test run -->
+					<!-- <includes> -->
+						<!-- <include>GreeterTest.java</include>  -->
+					<!-- </includes> -->
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
