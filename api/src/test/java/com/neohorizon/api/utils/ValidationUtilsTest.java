@@ -30,7 +30,7 @@ public class ValidationUtilsTest {
     
     @Test
     void verificaValidacaoEmail() {
-        Assertions.assertThrows(ValidationException.class, () -> ValidationUtils.requireValidEmail(""));
+        Assertions.assertThrows(ValidationException.class, () -> ValidationUtils.requireValidEmail("teste@dominio"));
         Assertions.assertThrows(ValidationException.class, () -> ValidationUtils.requireValidEmail("testeemailsempadrao@"));
         Assertions.assertDoesNotThrow(() -> ValidationUtils.requireValidEmail("teste@dominio"));
     }
