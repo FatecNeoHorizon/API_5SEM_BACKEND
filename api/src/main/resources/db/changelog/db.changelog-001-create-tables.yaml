@@ -1,0 +1,402 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-dim-atividade
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_atividade
+            columns:
+              - column:
+                  name: atividade_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: atividade_nome
+                  type: TEXT
+              - column:
+                  name: atividade_descricao
+                  type: TEXT
+              - column:
+                  name: atividade_jira_id
+                  type: VARCHAR(255)
+              - column:
+                  name: ativo
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+
+  - changeSet:
+      id: create-dim-dev
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_dev
+            columns:
+              - column:
+                  name: dev_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: dev_nome
+                  type: VARCHAR(255)
+              - column:
+                  name: dev_custo_hora
+                  type: NUMERIC(10,2)
+
+  - changeSet:
+      id: create-dim-periodo
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_periodo
+            columns:
+              - column:
+                  name: periodo_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: periodo_dia
+                  type: INTEGER
+              - column:
+                  name: periodo_semana
+                  type: INTEGER
+              - column:
+                  name: periodo_mes
+                  type: INTEGER
+              - column:
+                  name: periodo_ano
+                  type: INTEGER
+
+  - changeSet:
+      id: create-dim-projeto
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_projeto
+            columns:
+              - column:
+                  name: projeto_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: projeto_nome
+                  type: VARCHAR(255)
+              - column:
+                  name: projeto_key
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: projeto_jira_id
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: create-dim-status
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_status
+            columns:
+              - column:
+                  name: status_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: status_nome
+                  type: VARCHAR(255)
+              - column:
+                  name: status_jira_id
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: create-dim-tipo
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_tipo
+            columns:
+              - column:
+                  name: tipo_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: tipo_nome
+                  type: VARCHAR(255)
+              - column:
+                  name: tipo_descricao
+                  type: VARCHAR(255)
+              - column:
+                  name: tipo_jira_id
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: create-fato-atividade
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: fato_atividade
+            columns:
+              - column:
+                  name: fato_atividade_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: projeto_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: periodo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tipo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: atividade_quantidade
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: fato_atividade
+            columnNames: projeto_id, periodo_id, status_id, tipo_id
+            constraintName: uq_atividade_gran
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: projeto_id
+            referencedTableName: dim_projeto
+            referencedColumnNames: projeto_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_projeto
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: periodo_id
+            referencedTableName: dim_periodo
+            referencedColumnNames: periodo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_periodo
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: status_id
+            referencedTableName: dim_status
+            referencedColumnNames: status_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_status
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: tipo_id
+            referencedTableName: dim_tipo
+            referencedColumnNames: tipo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_tipo
+        - createIndex:
+            indexName: idx_fato_atividade_proj_periodo
+            tableName: fato_atividade
+            columns:
+              - column:
+                  name: projeto_id
+              - column:
+                  name: periodo_id
+
+  - changeSet:
+      id: create-fato-custo-hora
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: fato_custo_hora
+            columns:
+              - column:
+                  name: custo_hora_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: projeto_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: periodo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dev_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: custo
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: horas_quantidade
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: fato_custo_hora
+            columnNames: projeto_id, periodo_id, dev_id
+            constraintName: uq_custo_hora_gran
+        - addForeignKeyConstraint:
+            baseTableName: fato_custo_hora
+            baseColumnNames: projeto_id
+            referencedTableName: dim_projeto
+            referencedColumnNames: projeto_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_custo_hora_dim_projeto
+        - addForeignKeyConstraint:
+            baseTableName: fato_custo_hora
+            baseColumnNames: periodo_id
+            referencedTableName: dim_periodo
+            referencedColumnNames: periodo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_custo_hora_dim_periodo
+        - addForeignKeyConstraint:
+            baseTableName: fato_custo_hora
+            baseColumnNames: dev_id
+            referencedTableName: dim_dev
+            referencedColumnNames: dev_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_custo_hora_dim_dev
+        - createIndex:
+            indexName: idx_fato_custo_hora_dev_periodo
+            tableName: fato_custo_hora
+            columns:
+              - column:
+                  name: dev_id
+              - column:
+                  name: periodo_id
+
+  - changeSet:
+      id: create-fato-apontamento-horas
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: fato_apontamento_horas
+            columns:
+              - column:
+                  name: apontamento_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: periodo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: data_atualizacao
+                  type: TIMESTAMP(6)
+              - column:
+                  name: data_criacao
+                  type: TIMESTAMP
+              - column:
+                  name: descricao_trabalho
+                  type: TEXT
+              - column:
+                  name: horas_trabalhadas
+                  type: DOUBLE PRECISION
+              - column:
+                  name: atividade_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dev_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: projeto_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tipo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: fato_apontamento_horas
+            baseColumnNames: periodo_id
+            referencedTableName: dim_periodo
+            referencedColumnNames: periodo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_apontamento_horas_periodo
+        - addForeignKeyConstraint:
+            baseTableName: fato_apontamento_horas
+            baseColumnNames: atividade_id
+            referencedTableName: dim_atividade
+            referencedColumnNames: atividade_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_apontamento_horas_atividade
+        - addForeignKeyConstraint:
+            baseTableName: fato_apontamento_horas
+            baseColumnNames: dev_id
+            referencedTableName: dim_dev
+            referencedColumnNames: dev_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_apontamento_horas_dev
+        - addForeignKeyConstraint:
+            baseTableName: fato_apontamento_horas
+            baseColumnNames: projeto_id
+            referencedTableName: dim_projeto
+            referencedColumnNames: projeto_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_apontamento_horas_projeto
+        - addForeignKeyConstraint:
+            baseTableName: fato_apontamento_horas
+            baseColumnNames: tipo_id
+            referencedTableName: dim_tipo
+            referencedColumnNames: tipo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_apontamento_horas_tipo
+        - createIndex:
+            indexName: idx_apontamento_dev_periodo
+            tableName: fato_apontamento_horas 
+            columns:
+              - column:
+                  name: dev_id
+              - column:
+                  name: periodo_id
+        - createIndex:
+            indexName: idx_apontamento_projeto_periodo
+            tableName: fato_apontamento_horas
+            columns:
+              - column:
+                  name: projeto_id
+              - column:
+                  name: periodo_id
+        - createIndex:
+            indexName: idx_apontamento_tipo_periodo
+            tableName: fato_apontamento_horas
+            columns:
+              - column:
+                  name: tipo_id
+              - column:
+                  name: periodo_id
