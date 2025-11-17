@@ -2,8 +2,8 @@ package com.neohorizon.api.security;
 
 import java.io.IOException;
 import java.security.Key;
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class JwtUtils {
         if (!usuario.getAuthorities().isEmpty()) {
             // Dentro do generateToken()
             List<String> authorities = usuario.getAuthorities().stream()
-                .map(auth -> auth.getAuthority().replaceFirst("^ROLE_", "")) // remove prefixo se existir
+                .map(auth -> auth.getAuthority().replaceFirst("^ROLE_", ""))
                 .toList();
             withoutPassword.setRoleTypes(authorities);
 
@@ -73,7 +73,6 @@ public class JwtUtils {
 
             authorities = usuario.getAuthorities().stream()
                     .map(role -> {
-                        // Garante que todas as roles tenham o prefixo ROLE_
                         String normalized = role.startsWith(ROLE_PREFIX)
                                 ? role
                                 : ROLE_PREFIX + role;
@@ -102,7 +101,7 @@ public class JwtUtils {
                     .getExpiration();
 
             return expiration.before(new Date());
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             logger.warn("Erro ao validar token JWT: {}", e.getMessage());
             return true;
         }
