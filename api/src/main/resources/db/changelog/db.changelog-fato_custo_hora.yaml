@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-fato-custo-hora
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: fato_custo_hora
+            columns:
+              - column:
+                  name: custo_hora_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: projeto_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: periodo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: dev_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: custo
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: horas_quantidade
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: fato_custo_hora
+            columnNames: projeto_id, periodo_id, dev_id
+            constraintName: uq_custo_hora_gran
+        - addForeignKeyConstraint:
+            baseTableName: fato_custo_hora
+            baseColumnNames: projeto_id
+            referencedTableName: dim_projeto
+            referencedColumnNames: projeto_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_custo_hora_dim_projeto
+        - addForeignKeyConstraint:
+            baseTableName: fato_custo_hora
+            baseColumnNames: periodo_id
+            referencedTableName: dim_periodo
+            referencedColumnNames: periodo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_custo_hora_dim_periodo
+        - addForeignKeyConstraint:
+            baseTableName: fato_custo_hora
+            baseColumnNames: dev_id
+            referencedTableName: dim_dev
+            referencedColumnNames: dev_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_custo_hora_dim_dev
+        - createIndex:
+            indexName: idx_fato_custo_hora_dev_periodo
+            tableName: fato_custo_hora
+            columns:
+              - column:
+                  name: dev_id
+              - column:
+                  name: periodo_id

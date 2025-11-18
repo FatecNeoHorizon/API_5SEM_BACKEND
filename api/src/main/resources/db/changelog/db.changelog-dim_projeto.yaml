@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-dim-projeto
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_projeto
+            columns:
+              - column:
+                  name: projeto_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: projeto_nome
+                  type: VARCHAR(255)
+              - column:
+                  name: projeto_key
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: projeto_jira_id
+                  type: VARCHAR(255)
