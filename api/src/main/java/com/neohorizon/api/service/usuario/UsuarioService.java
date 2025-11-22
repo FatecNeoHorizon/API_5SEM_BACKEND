@@ -1,9 +1,16 @@
 package com.neohorizon.api.service.usuario;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.neohorizon.api.config.JwtUtils;
 import com.neohorizon.api.dto.usuario.UsuarioDTO;
 import com.neohorizon.api.entity.usuario.Usuario;
 import com.neohorizon.api.exception.EntityNotFoundException;
@@ -17,10 +24,12 @@ public class UsuarioService {
     private static final String ENTITY_NAME = "usuario";
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper) {
+    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioMapper = usuarioMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UsuarioDTO> getAllUsers() {
@@ -61,7 +70,6 @@ public class UsuarioService {
         usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, usuarioId));
         
-        // 2. Mapeamento: cria uma entidade a partir do DTO e preserva o id existente
         Usuario usuarioToSave = usuarioMapper.toEntity(usuarioDTO);
         usuarioToSave.setUsuario_id(usuarioId);
 
@@ -73,7 +81,6 @@ public class UsuarioService {
         ValidationUtils.requireValidId(id, ENTITY_NAME);
         ValidationUtils.requireNonEmpty(newPassword, "Nova senha");
 
-        // Lançando EntityNotFoundException (Status 404)
         Usuario existingUsuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
 
@@ -84,12 +91,57 @@ public class UsuarioService {
 
     public void deleteUser(Long id) {
         ValidationUtils.requireValidId(id, ENTITY_NAME);
-
-        // Lançando EntityNotFoundException (Status 404)
         Usuario existingUsuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+        if (existingUsuario != null) {
+            usuarioRepository.delete(existingUsuario);
+        }
+    }
 
-        usuarioRepository.delete(existingUsuario);
+    public Usuario findById(Long id) {
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+    }
+
+    public Usuario save(Usuario usuario) {
+        ValidationUtils.requireNonNull(usuario, ENTITY_NAME);
+        return usuarioRepository.save(usuario);
+    }
+
+     public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+
+        ValidationUtils.requireValidId(id, ENTITY_NAME);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
+
+        return new org.springframework.security.core.userdetails.User(
+                usuario.getEmail(),
+                usuario.getSenha(),
+                usuario.getAuthorities() != null ? usuario.getAuthorities() :
+                new ArrayList<>()
+        );
+    }
+
+    public String authenticate(String email, String rawPassword) {
+        ValidationUtils.requireNonEmpty(email, ENTITY_NAME);
+        ValidationUtils.requireNonEmpty(rawPassword, "Senha");
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+
+        if (!passwordEncoder.matches(rawPassword, usuario.getSenha())) {
+            throw new UsernameNotFoundException("Credenciais inválidas");
+        }
+
+
+        UserDetails principal = new User(
+            usuario.getEmail(), usuario.getSenha(), usuario.getAuthorities());
+        try {
+            return JwtUtils.generateToken(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(principal.getUsername(), null, principal.getAuthorities()));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Erro ao gerar token JWT", e);
+        }
     }
 
 }
