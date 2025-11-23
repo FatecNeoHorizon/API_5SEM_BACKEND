@@ -9,7 +9,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,6 +22,9 @@ import com.neohorizon.api.dto.response.dimensao.DimDevDTO;
 import com.neohorizon.api.dto.response.dimensao.DimPeriodoDTO;
 import com.neohorizon.api.dto.response.dimensao.DimProjetoDTO;
 
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false) 
+@ActiveProfiles("test")
 public class IntegrationFatosTest extends AbstractIntegrationTest {
 
     private Long criarDimProjeto(String nome) throws Exception {
