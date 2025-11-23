@@ -7,9 +7,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.neohorizon.api.entity.usuario.Usuario;
+import com.neohorizon.api.dto.usuario.UsuarioDTO;
 import com.neohorizon.api.enums.RoleType;
 import com.neohorizon.api.repository.usuario.UsuarioRepository;
+import com.neohorizon.api.service.usuario.UsuarioService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,17 +32,17 @@ public class DataInitializer {
 
 
     @Bean
-    CommandLineRunner initDatabase(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    CommandLineRunner initDatabase(UsuarioService usuarioService, UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             if (usuarioRepository.findByEmail(etlEmail).isEmpty()) {
                 log.info("Criando usuário técnico para ETL...");
                 
-                Usuario etlUser = new Usuario();
+                UsuarioDTO etlUser = new UsuarioDTO();
                 etlUser.setEmail(etlEmail);
                 etlUser.setSenha(passwordEncoder.encode(etlPassword));
                 etlUser.setCargo(RoleType.ETL);
                 
-                usuarioRepository.save(etlUser);
+                usuarioService.createUser(etlUser);
                 log.info("✅ Usuário ETL criado com sucesso: {}", etlEmail);
                 log.warn("⚠️ IMPORTANTE: Configure as variáveis ETL_EMAIL e ETL_PASSWORD em produção!");
             } else {
@@ -51,12 +52,12 @@ public class DataInitializer {
             if (usuarioRepository.findByEmail(adminEmail).isEmpty()) {
                 log.info("Criando usuário técnico para ADMIN...");
                 
-                Usuario adminUser = new Usuario();
+                UsuarioDTO adminUser = new UsuarioDTO();
                 adminUser.setEmail(adminEmail);
                 adminUser.setSenha(passwordEncoder.encode(adminPassword));
                 adminUser.setCargo(RoleType.ADMIN);
                 
-                usuarioRepository.save(adminUser);
+                usuarioService.createUser(adminUser);
                 log.info("✅ Usuário ADMIN criado com sucesso: {}", adminEmail);
                 log.warn("⚠️ IMPORTANTE: Configure as variáveis ADMIN_EMAIL e ADMIN_PASSWORD em produção!");
             } else {
