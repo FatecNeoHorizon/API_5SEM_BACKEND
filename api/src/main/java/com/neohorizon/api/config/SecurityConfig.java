@@ -40,38 +40,21 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
 
                 // Endpoints de leitura - ADMIN, DEVELOPER, MANAGER e ETL
-                .requestMatchers(HttpMethod.GET, "/dim-atividade/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dim-dev/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dim-periodo/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dim-projeto/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dim-status/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/dim-tipo/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/metrics/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/fato-atividade/").permitAll()
-                .requestMatchers(HttpMethod.GET, "/fato-apontamento-horas/").permitAll()
-
+                .requestMatchers(HttpMethod.GET, "/dim-atividade", "/dim-atividade/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/dim-dev", "/dim-dev/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/dim-periodo", "/dim-periodo/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/dim-projeto", "/dim-projeto/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/dim-status", "/dim-status/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/dim-tipo", "/dim-tipo/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/metrics", "/metrics/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/fato-atividade", "/fato-atividade/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/fato-apontamento-horas", "/fato-apontamento-horas/**").permitAll()
+                
                 // Endpoints de CUSTO - APENAS MANAGER (DEVELOPER não pode acessar)
-                .requestMatchers(HttpMethod.GET,"/fato-custo-hora/").hasAnyRole(RoleType.MANAGER.name(), RoleType.ADMIN.name(), RoleType.ETL.name())
-                
-                // Endpoints de escrita (POST, PUT, DELETE) - apenas Admin (ETL e ADMIN)
-                .requestMatchers(HttpMethod.POST, "/dim-/*").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.PUT, "/dim-/*").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.DELETE, "/dim-/*").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-
-                .requestMatchers(HttpMethod.POST, "/fato-atividade/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.PUT, "/fato-atividade/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.DELETE, "/fato-atividade/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-
-                .requestMatchers(HttpMethod.POST, "/fato-apontamento-horas/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.PUT, "/fato-apontamento-horas/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.DELETE, "/fato-apontamento-horas/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-
-                .requestMatchers(HttpMethod.POST, "/fato-custo-hora/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.PUT, "/fato-custo-hora/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                .requestMatchers(HttpMethod.DELETE, "/fato-custo-hora/").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
-                
+                .requestMatchers(HttpMethod.GET,"/fato-custo-hora", "/fato-custo-hora/**").hasAnyRole(RoleType.MANAGER.name(), RoleType.ADMIN.name(), RoleType.ETL.name())
+                          
                 // Qualquer outra rota - apenas MANAGER
-                .requestMatchers("/").hasAnyRole(RoleType.ADMIN.name(), RoleType.MANAGER.name(), RoleType.ETL.name())
+                .requestMatchers("/**").hasAnyRole(RoleType.ADMIN.name(), RoleType.ETL.name())
                 .anyRequest().authenticated()
             )
             .httpBasic(httpBasic -> httpBasic.realmName("Neo Horizon"))
