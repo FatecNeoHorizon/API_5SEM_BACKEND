@@ -46,6 +46,7 @@ public class UsuarioService {
         return usuarioMapper.toDTO(usuario);
     }
 
+    
     public UsuarioDTO createUser(UsuarioDTO usuarioDTO) {
         ValidationUtils.requireValidRole(usuarioDTO.getCargo());
         ValidationUtils.requireNonEmpty(usuarioDTO.getEmail(), "Email do " + ENTITY_NAME);
@@ -55,6 +56,7 @@ public class UsuarioService {
         ValidationUtils.requireValidRole(usuarioDTO.getCargo());
 
         Usuario usuario = usuarioMapper.toEntity(usuarioDTO);
+        usuario.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
         Usuario savedUsuario = usuarioRepository.save(usuario);
         return usuarioMapper.toDTO(savedUsuario);
     }
@@ -72,6 +74,7 @@ public class UsuarioService {
         
         Usuario usuarioToSave = usuarioMapper.toEntity(usuarioDTO);
         usuarioToSave.setUsuario_id(usuarioId);
+        usuarioToSave.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
 
         Usuario updatedUsuario = usuarioRepository.save(usuarioToSave);
         return usuarioMapper.toDTO(updatedUsuario);
@@ -84,7 +87,7 @@ public class UsuarioService {
         Usuario existingUsuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
 
-        existingUsuario.setSenha(newPassword);
+        existingUsuario.setSenha(passwordEncoder.encode(newPassword));
         usuarioRepository.save(existingUsuario);
         return true;
     }
@@ -104,12 +107,8 @@ public class UsuarioService {
                 .orElseThrow(() -> EntityNotFoundException.forId(ENTITY_NAME, id));
     }
 
-    public Usuario save(Usuario usuario) {
-        ValidationUtils.requireNonNull(usuario, ENTITY_NAME);
-        return usuarioRepository.save(usuario);
-    }
 
-     public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
 
         ValidationUtils.requireValidId(id, ENTITY_NAME);
         Usuario usuario = usuarioRepository.findById(id)
