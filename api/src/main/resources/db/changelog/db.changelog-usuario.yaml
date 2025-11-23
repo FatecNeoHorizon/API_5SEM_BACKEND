@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-usuario
+      author: cesar
+      changes:
+        - createTable:
+            tableName: usuario
+            columns:
+              - column:
+                  name: usuario_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: senha
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cargo
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false

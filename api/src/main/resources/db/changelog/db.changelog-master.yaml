@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/db.changelog-dim_atividade.yaml
+  - include:
+      file: db/changelog/db.changelog-dim_dev.yaml
+  - include:
+      file: db/changelog/db.changelog-dim_periodo.yaml
+  - include:
+      file: db/changelog/db.changelog-dim_projeto.yaml
+  - include:
+      file: db/changelog/db.changelog-dim_status.yaml
+  - include:
+      file: db/changelog/db.changelog-dim_tipo.yaml
+  - include:
+      file: db/changelog/db.changelog-fato_apontamento_horas.yaml
+  - include:
+      file: db/changelog/db.changelog-fato_atividade.yaml
+  - include:
+      file: db/changelog/db.changelog-fato_custo_hora.yaml
+  - include:
+      file: db/changelog/db.changelog-usuario.yaml

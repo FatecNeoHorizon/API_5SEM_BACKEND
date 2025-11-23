@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-dim-periodo
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_periodo
+            columns:
+              - column:
+                  name: periodo_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: periodo_dia
+                  type: INTEGER
+              - column:
+                  name: periodo_semana
+                  type: INTEGER
+              - column:
+                  name: periodo_mes
+                  type: INTEGER
+              - column:
+                  name: periodo_ano
+                  type: INTEGER
