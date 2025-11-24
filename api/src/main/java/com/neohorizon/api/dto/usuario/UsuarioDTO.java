@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UsuarioDTO {
 
+    private Long usuario_id;
     private String email;
     private String senha;
     private RoleType cargo;
