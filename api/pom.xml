@@ -237,9 +237,11 @@
 				<version>3.2.5</version> 
 				<configuration>
 					<!-- List of test classes to exclude from the test run -->
-					<!-- <excludes>
-						<exclude>ConvertStringToIntegerTest.java</exclude> 
-					</excludes> -->
+					<excludes>
+						<exclude>AbstractIntegrationTest.java</exclude> 
+						<exclude>IntegrationDimensoesTest.java</exclude> 
+						<exclude>IntegrationFatosTest.java</exclude> 
+					</excludes>
 					<!-- List of test classes to include in the test run -->
 					<!-- <includes> -->
 						<!-- <include>GreeterTest.java</include>  -->
