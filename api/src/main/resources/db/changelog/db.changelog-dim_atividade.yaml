@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-dim-atividade
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_atividade
+            columns:
+              - column:
+                  name: atividade_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: atividade_nome
+                  type: TEXT
+              - column:
+                  name: atividade_descricao
+                  type: TEXT
+              - column:
+                  name: atividade_jira_id
+                  type: VARCHAR(255)
+              - column:
+                  name: ativo
+                  type: BOOLEAN
+                  defaultValueBoolean: true

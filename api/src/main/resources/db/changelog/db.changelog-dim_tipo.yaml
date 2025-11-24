@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-dim-tipo
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_tipo
+            columns:
+              - column:
+                  name: tipo_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: tipo_nome
+                  type: VARCHAR(255)
+              - column:
+                  name: tipo_descricao
+                  type: VARCHAR(255)
+              - column:
+                  name: tipo_jira_id
+                  type: VARCHAR(255)

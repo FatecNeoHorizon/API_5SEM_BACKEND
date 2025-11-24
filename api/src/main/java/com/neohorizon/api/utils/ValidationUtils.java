@@ -2,6 +2,7 @@ package com.neohorizon.api.utils;
 
 import com.neohorizon.api.dto.response.fato.FatoApontamentoHorasDTO;
 import com.neohorizon.api.dto.response.fato.FatoAtividadeDTO;
+import com.neohorizon.api.enums.RoleType;
 import com.neohorizon.api.exception.ValidationException;
 
 
@@ -75,6 +76,16 @@ public final class ValidationUtils {
         requireNonEmpty(email, "Email");
         if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new ValidationException("Email deve ter um formato válido");
+        }
+    }
+
+    public static void requireValidRole(RoleType cargo) {
+        requireNonNull(cargo, "cargo");
+        try {
+            RoleType.valueOf(cargo.name());
+        } catch (ValidationException e) {
+            throw new ValidationException("Cargo inválido: '" + cargo + "'. Deve ser um dos seguintes valores: " +
+                    java.util.Arrays.toString(RoleType.values()));
         }
     }
 }

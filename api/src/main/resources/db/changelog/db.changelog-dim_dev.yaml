@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-dim-dev
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: dim_dev
+            columns:
+              - column:
+                  name: dev_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: dev_nome
+                  type: VARCHAR(255)
+              - column:
+                  name: dev_custo_hora
+                  type: NUMERIC(10,2)

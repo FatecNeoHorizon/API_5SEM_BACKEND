@@ -1,0 +1,79 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-fato-atividade
+      author: vinicius
+      changes:
+        - createTable:
+            tableName: fato_atividade
+            columns:
+              - column:
+                  name: fato_atividade_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: projeto_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: periodo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tipo_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: atividade_quantidade
+                  type: NUMERIC(10,2)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: fato_atividade
+            columnNames: projeto_id, periodo_id, status_id, tipo_id
+            constraintName: uq_atividade_gran
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: projeto_id
+            referencedTableName: dim_projeto
+            referencedColumnNames: projeto_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_projeto
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: periodo_id
+            referencedTableName: dim_periodo
+            referencedColumnNames: periodo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_periodo
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: status_id
+            referencedTableName: dim_status
+            referencedColumnNames: status_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_status
+        - addForeignKeyConstraint:
+            baseTableName: fato_atividade
+            baseColumnNames: tipo_id
+            referencedTableName: dim_tipo
+            referencedColumnNames: tipo_id
+            onDelete: RESTRICT
+            constraintName: fk_fato_atividade_dim_tipo
+        - createIndex:
+            indexName: idx_fato_atividade_proj_periodo
+            tableName: fato_atividade
+            columns:
+              - column:
+                  name: projeto_id
+              - column:
+                  name: periodo_id
