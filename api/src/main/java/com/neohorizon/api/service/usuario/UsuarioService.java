@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.neohorizon.api.config.JwtUtils;
@@ -22,6 +24,7 @@ import com.neohorizon.api.utils.ValidationUtils;
 public class UsuarioService {
 
     private static final String ENTITY_NAME = "usuario";
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
     private final UsuarioRepository usuarioRepository;
     private final UsuarioMapper usuarioMapper;
     private final PasswordEncoder passwordEncoder;
@@ -50,7 +53,6 @@ public class UsuarioService {
     public UsuarioDTO createUser(UsuarioDTO usuarioDTO) {
         ValidationUtils.requireValidRole(usuarioDTO.getCargo());
         ValidationUtils.requireNonEmpty(usuarioDTO.getEmail(), "Email do " + ENTITY_NAME);
-        ValidationUtils.requireNonEmpty(usuarioDTO.getEmail(), ENTITY_NAME);
         ValidationUtils.requireNonEmpty(usuarioDTO.getSenha(), "Senha do " + ENTITY_NAME);
         ValidationUtils.requireNonNull(usuarioDTO.getCargo(), "Cargo");
         ValidationUtils.requireValidRole(usuarioDTO.getCargo());
@@ -123,7 +125,7 @@ public class UsuarioService {
     }
 
     public String authenticate(String email, String rawPassword) {
-        ValidationUtils.requireNonEmpty(email, ENTITY_NAME);
+        ValidationUtils.requireNonEmpty(email, "Email");
         ValidationUtils.requireNonEmpty(rawPassword, "Senha");
 
         Usuario usuario = usuarioRepository.findByEmail(email)
@@ -133,13 +135,20 @@ public class UsuarioService {
             throw new UsernameNotFoundException("Credenciais inválidas");
         }
 
-
-        UserDetails principal = new User(
-            usuario.getEmail(), usuario.getSenha(), usuario.getAuthorities());
         try {
-            return JwtUtils.generateToken(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(principal.getUsername(), null, principal.getAuthorities()));
+            logger.debug("[DEBUG] Gerando token para: {}", usuario.getEmail());
+            logger.debug("[DEBUG] Authorities: {}", usuario.getAuthorities());
+            org.springframework.security.core.Authentication auth =
+                    new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                            usuario.getEmail(),
+                            null,
+                            usuario.getAuthorities() != null ? usuario.getAuthorities() : new ArrayList<>()
+                    );
+            return JwtUtils.generateToken(auth);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Erro ao gerar token JWT", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro inesperado ao autenticar", e);
         }
     }
 

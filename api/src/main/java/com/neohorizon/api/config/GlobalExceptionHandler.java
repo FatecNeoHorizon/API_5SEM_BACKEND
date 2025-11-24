@@ -98,6 +98,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDTO> handleRuntimeException(
             RuntimeException ex, WebRequest request) {
         
+        // Log the actual error for debugging
+        ex.printStackTrace();
+        
         ErrorResponseDTO errorResponse = ErrorResponseDTO.of(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Internal Server Error",
