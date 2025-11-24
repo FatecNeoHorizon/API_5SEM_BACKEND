@@ -39,7 +39,7 @@ public class DataInitializer {
                 
                 UsuarioDTO etlUser = new UsuarioDTO();
                 etlUser.setEmail(etlEmail);
-                etlUser.setSenha(passwordEncoder.encode(etlPassword));
+                etlUser.setSenha(etlPassword);
                 etlUser.setCargo(RoleType.ETL);
                 
                 usuarioService.createUser(etlUser);
@@ -54,7 +54,7 @@ public class DataInitializer {
                 
                 UsuarioDTO adminUser = new UsuarioDTO();
                 adminUser.setEmail(adminEmail);
-                adminUser.setSenha(passwordEncoder.encode(adminPassword));
+                adminUser.setSenha(adminPassword);
                 adminUser.setCargo(RoleType.ADMIN);
                 
                 usuarioService.createUser(adminUser);

@@ -128,6 +128,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/metrics", "/metrics/**").hasAnyRole("ADMIN", "ETL")
                 .requestMatchers(HttpMethod.DELETE, "/metrics", "/metrics/**").hasAnyRole("ADMIN", "ETL")
                 
+                // Deletar dados - apenas ETL
+                .requestMatchers(HttpMethod.POST, "/deletar-dados").hasRole("ETL")
+                
                 // Qualquer outra rota - apenas ADMIN e ETL
                 .requestMatchers("/**").hasAnyRole("ADMIN", "ETL")
                 .anyRequest().authenticated()
